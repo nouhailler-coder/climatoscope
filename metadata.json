@@ -1,0 +1,6 @@
+{
+  "name": "ClimatOSCOPE",
+  "description": "Comprendre le climat à partir des mesures. Observatoire scientifique open-data des séries solaires, CO2, températures, océans, bilans CERES et forçage volcanique SAOD.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
