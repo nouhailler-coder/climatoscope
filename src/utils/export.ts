@@ -65,6 +65,21 @@ export function exportMultiSeriesToCSV(
   downloadBlob(content, filename, 'text/csv;charset=utf-8;');
 }
 
+export function exportToCsv(data: Record<string, any>[], filename: string = 'export.csv') {
+  if (data.length === 0) return;
+  const headers = Object.keys(data[0]);
+  const rows = data.map((row) =>
+    headers.map((h) => (row[h] !== undefined && row[h] !== null ? `"${row[h]}"` : '""')).join(',')
+  );
+  const csvContent = [headers.join(','), ...rows].join('\n');
+  downloadBlob(csvContent, filename, 'text/csv;charset=utf-8;');
+}
+
+export function exportToJson(data: any, filename: string = 'export.json') {
+  const jsonContent = JSON.stringify(data, null, 2);
+  downloadBlob(jsonContent, filename, 'application/json');
+}
+
 function downloadBlob(content: string, filename: string, mimeType: string) {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);

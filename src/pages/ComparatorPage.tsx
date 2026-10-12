@@ -8,20 +8,32 @@ import { Scale, Info, Layers, Sliders, Download, ScatterChart as ScatterIcon } f
 export const ComparatorPage: React.FC = () => {
   const tsi = useDataset('solar-tsi-lisird');
   const co2 = useDataset('co2-noaa-mauna-loa');
+  const ch4 = useDataset('ghg-ch4-noaa');
+  const n2o = useDataset('ghg-n2o-noaa');
+  const aggi = useDataset('ghg-aggi-noaa');
   const temp = useDataset('temp-nasa-gistemp');
   const ocean = useDataset('ocean-ohc-argo-2000m');
   const ceres = useDataset('energy-ceres-net-toa');
   const volcano = useDataset('volcano-saod-giss');
+  const ice = useDataset('seaice-arctic-september-nsidc');
+  const zonal = useDataset('zonal-temp-arctic-era5');
+  const aerosols = useDataset('aerosols-cams-total-aod');
   const power = useDataset('nasa-power-radiation');
 
   // Series selection states
   const [enabledMap, setEnabledMap] = useState<Record<string, boolean>>({
     'solar-tsi-lisird': true,
     'co2-noaa-mauna-loa': true,
+    'ghg-ch4-noaa': false,
+    'ghg-n2o-noaa': false,
+    'ghg-aggi-noaa': false,
     'temp-nasa-gistemp': true,
+    'zonal-temp-arctic-era5': false,
+    'seaice-arctic-september-nsidc': false,
     'ocean-ohc-argo-2000m': false,
     'energy-ceres-net-toa': false,
     'volcano-saod-giss': false,
+    'aerosols-cams-total-aod': false,
     'nasa-power-radiation': false,
   });
 
@@ -81,6 +93,75 @@ export const ComparatorPage: React.FC = () => {
       data: co2.dataset?.data || [],
       color: '#10b981', // emerald
       enabled: !!enabledMap['co2-noaa-mauna-loa'],
+    },
+    {
+      id: 'ghg-ch4-noaa',
+      metadata: ch4.dataset?.metadata || {
+        id: 'ghg-ch4-noaa',
+        name: 'Méthane Atmosphérique Global (CH₄)',
+        shortName: '⚡ Méthane (CH₄)',
+        organization: 'NOAA GML',
+        source: 'NOAA MBL',
+        sourceUrl: '',
+        variable: 'CH4',
+        variableSymbol: 'CH₄',
+        unit: 'ppb',
+        unitSymbol: 'ppb',
+        frequency: 'monthly',
+        startDate: '1983',
+        endDate: '2025',
+        retrievedAt: '',
+        description: '',
+      },
+      data: ch4.dataset?.data || [],
+      color: '#f59e0b', // amber
+      enabled: !!enabledMap['ghg-ch4-noaa'],
+    },
+    {
+      id: 'ghg-n2o-noaa',
+      metadata: n2o.dataset?.metadata || {
+        id: 'ghg-n2o-noaa',
+        name: 'Protoxyde d’Azote (N₂O)',
+        shortName: '🌾 Protoxyde d’azote (N₂O)',
+        organization: 'NOAA GML',
+        source: 'NOAA HATS',
+        sourceUrl: '',
+        variable: 'N2O',
+        variableSymbol: 'N₂O',
+        unit: 'ppb',
+        unitSymbol: 'ppb',
+        frequency: 'monthly',
+        startDate: '2001',
+        endDate: '2025',
+        retrievedAt: '',
+        description: '',
+      },
+      data: n2o.dataset?.data || [],
+      color: '#818cf8', // indigo
+      enabled: !!enabledMap['ghg-n2o-noaa'],
+    },
+    {
+      id: 'ghg-aggi-noaa',
+      metadata: aggi.dataset?.metadata || {
+        id: 'ghg-aggi-noaa',
+        name: 'Indice Forçage Cumulé (AGGI)',
+        shortName: '📊 Indice AGGI NOAA',
+        organization: 'NOAA GML',
+        source: 'NOAA AGGI',
+        sourceUrl: '',
+        variable: 'AGGI',
+        variableSymbol: 'AGGI',
+        unit: 'Indice',
+        unitSymbol: 'AGGI',
+        frequency: 'annual',
+        startDate: '1979',
+        endDate: '2025',
+        retrievedAt: '',
+        description: '',
+      },
+      data: aggi.dataset?.data || [],
+      color: '#fb7185', // rose-400
+      enabled: !!enabledMap['ghg-aggi-noaa'],
     },
     {
       id: 'temp-nasa-gistemp',
@@ -173,6 +254,75 @@ export const ComparatorPage: React.FC = () => {
       data: volcano.dataset?.data || [],
       color: '#f97316', // orange
       enabled: !!enabledMap['volcano-saod-giss'],
+    },
+    {
+      id: 'zonal-temp-arctic-era5',
+      metadata: zonal.dataset?.metadata || {
+        id: 'zonal-temp-arctic-era5',
+        name: 'Arctique (90°N–64°N) ERA5 / GISS',
+        shortName: '🌎 Arctique ERA5',
+        organization: 'Copernicus / GISS',
+        source: 'ERA5 / GISS',
+        sourceUrl: '',
+        variable: 'ΔT_Arctique',
+        variableSymbol: 'ΔT',
+        unit: '°C',
+        unitSymbol: '°C',
+        frequency: 'annual',
+        startDate: '1950',
+        endDate: '2024',
+        retrievedAt: '',
+        description: '',
+      },
+      data: zonal.dataset?.data || [],
+      color: '#a855f7', // purple
+      enabled: !!enabledMap['zonal-temp-arctic-era5'],
+    },
+    {
+      id: 'seaice-arctic-september-nsidc',
+      metadata: ice.dataset?.metadata || {
+        id: 'seaice-arctic-september-nsidc',
+        name: 'Banquise Arctique (Septembre)',
+        shortName: '🧊 Banquise Arctique',
+        organization: 'NSIDC / NASA',
+        source: 'NSIDC v3',
+        sourceUrl: '',
+        variable: 'Extent',
+        variableSymbol: 'SIE',
+        unit: 'M km²',
+        unitSymbol: 'M km²',
+        frequency: 'annual',
+        startDate: '1979',
+        endDate: '2024',
+        retrievedAt: '',
+        description: '',
+      },
+      data: ice.dataset?.data || [],
+      color: '#06b6d4', // cyan
+      enabled: !!enabledMap['seaice-arctic-september-nsidc'],
+    },
+    {
+      id: 'aerosols-cams-total-aod',
+      metadata: aerosols.dataset?.metadata || {
+        id: 'aerosols-cams-total-aod',
+        name: 'Aérosols Troposphériques (AOD)',
+        shortName: '☁️ Aérosols (AOD)',
+        organization: 'Copernicus CAMS',
+        source: 'CAMS EAC4',
+        sourceUrl: '',
+        variable: 'AOD_550',
+        variableSymbol: 'AOD',
+        unit: 'AOD',
+        unitSymbol: 'AOD',
+        frequency: 'annual',
+        startDate: '2000',
+        endDate: '2024',
+        retrievedAt: '',
+        description: '',
+      },
+      data: aerosols.dataset?.data || [],
+      color: '#38bdf8', // sky
+      enabled: !!enabledMap['aerosols-cams-total-aod'],
     },
     {
       id: 'nasa-power-radiation',

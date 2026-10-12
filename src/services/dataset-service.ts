@@ -8,8 +8,12 @@ import { CeresProvider } from '../api/adapters/ceres';
 import { GistempProvider } from '../api/adapters/gistemp';
 import { LisirdProvider } from '../api/adapters/lisird';
 import { NasaPowerProvider } from '../api/adapters/nasa-power';
+import { NoaaGhgProvider } from '../api/adapters/noaa-ghg';
 import { NoaaGmlProvider } from '../api/adapters/noaa-gml';
 import { VolcanoProvider } from '../api/adapters/volcano';
+import { SeaIceProvider } from '../api/adapters/seaice';
+import { ZonalProvider } from '../api/adapters/zonal';
+import { AerosolsProvider } from '../api/adapters/aerosols';
 import { PRESET_LOCATIONS } from '../data/baseline/nasa-power-sample';
 import { CacheStatus, GeoLocation } from '../types/api';
 import { InternalDataset, TimeSeriesPoint } from '../types/dataset';
@@ -17,12 +21,16 @@ import { dbService } from './db';
 
 class DatasetService {
   private noaaProvider = new NoaaGmlProvider();
+  private noaaGhgProvider = new NoaaGhgProvider();
   private gistempProvider = new GistempProvider();
   private lisirdProvider = new LisirdProvider();
   private nasaPowerProvider = new NasaPowerProvider();
   private argoProvider = new ArgoProvider();
   private ceresProvider = new CeresProvider();
   private volcanoProvider = new VolcanoProvider();
+  private seaIceProvider = new SeaIceProvider();
+  private zonalProvider = new ZonalProvider();
+  private aerosolsProvider = new AerosolsProvider();
 
   // In-memory runtime cache
   private memoryCache = new Map<string, InternalDataset>();
@@ -57,6 +65,21 @@ class DatasetService {
     try {
       if (datasetId.startsWith('co2-noaa')) {
         points = await this.noaaProvider.fetchData({ forceRefresh });
+      } else if (datasetId === 'ghg-ch4-noaa') {
+        points = await this.noaaGhgProvider.fetchData({ forceRefresh });
+        metadata = this.noaaGhgProvider.getMetadata();
+      } else if (datasetId === 'ghg-ch4-annual-noaa') {
+        points = this.noaaGhgProvider.getCh4AnnualData();
+        metadata = this.noaaGhgProvider.getMetadata();
+      } else if (datasetId === 'ghg-n2o-noaa') {
+        points = await this.noaaGhgProvider.fetchN2oData({ forceRefresh });
+        metadata = this.noaaGhgProvider.getN2oMetadata();
+      } else if (datasetId === 'ghg-n2o-annual-noaa') {
+        points = this.noaaGhgProvider.getN2oAnnualData();
+        metadata = this.noaaGhgProvider.getN2oMetadata();
+      } else if (datasetId === 'ghg-aggi-noaa') {
+        points = this.noaaGhgProvider.getAggiData();
+        metadata = this.noaaGhgProvider.getAggiMetadata();
       } else if (datasetId.startsWith('temp-nasa')) {
         points = await this.gistempProvider.fetchData({ forceRefresh });
       } else if (datasetId.startsWith('temp-noaa')) {
@@ -91,6 +114,36 @@ class DatasetService {
       } else if (datasetId === 'volcano-saod-giss') {
         points = await this.volcanoProvider.fetchData({ forceRefresh });
         metadata = this.volcanoProvider.getMetadata();
+      } else if (datasetId === 'seaice-arctic-september-nsidc') {
+        points = await this.seaIceProvider.fetchData({ forceRefresh });
+        metadata = this.seaIceProvider.getMetadata();
+      } else if (datasetId === 'seaice-antarctic-february-nsidc') {
+        points = this.seaIceProvider.getAntarcticData();
+        metadata = this.seaIceProvider.getAntarcticMetadata();
+      } else if (datasetId === 'seaice-arctic-march-nsidc') {
+        points = this.seaIceProvider.getArcticMarchData();
+        metadata = this.seaIceProvider.getArcticMarchMetadata();
+      } else if (datasetId === 'zonal-temp-arctic-era5') {
+        points = await this.zonalProvider.fetchData({ forceRefresh });
+        metadata = this.zonalProvider.getMetadata();
+      } else if (datasetId === 'zonal-temp-northmid-era5') {
+        points = this.zonalProvider.getNorthMidData();
+        metadata = this.zonalProvider.getNorthMidMetadata();
+      } else if (datasetId === 'zonal-temp-tropics-era5') {
+        points = this.zonalProvider.getTropicsData();
+        metadata = this.zonalProvider.getTropicsMetadata();
+      } else if (datasetId === 'zonal-temp-southmid-era5') {
+        points = this.zonalProvider.getSouthMidData();
+        metadata = this.zonalProvider.getSouthMidMetadata();
+      } else if (datasetId === 'zonal-temp-antarctic-era5') {
+        points = this.zonalProvider.getAntarcticData();
+        metadata = this.zonalProvider.getAntarcticMetadata();
+      } else if (datasetId === 'aerosols-cams-total-aod') {
+        points = await this.aerosolsProvider.fetchData({ forceRefresh });
+        metadata = this.aerosolsProvider.getMetadata();
+      } else if (datasetId === 'aerosols-so2-emissions-ceds') {
+        points = this.aerosolsProvider.getSo2Data();
+        metadata = this.aerosolsProvider.getSo2Metadata();
       } else if (datasetId.startsWith('nasa-power')) {
         points = await this.nasaPowerProvider.fetchData({ forceRefresh });
         metadata = this.nasaPowerProvider.getMetadata();
@@ -139,6 +192,9 @@ class DatasetService {
 
   private getMetadataById(id: string) {
     if (id.startsWith('co2')) return this.noaaProvider.getMetadata();
+    if (id.startsWith('ghg-ch4')) return this.noaaGhgProvider.getMetadata();
+    if (id.startsWith('ghg-n2o')) return this.noaaGhgProvider.getN2oMetadata();
+    if (id.startsWith('ghg-aggi')) return this.noaaGhgProvider.getAggiMetadata();
     if (id.startsWith('temp-noaa')) return this.gistempProvider.getAlternativeDataset('noaa').metadata;
     if (id.startsWith('temp-berkeley')) return this.gistempProvider.getAlternativeDataset('berkeley').metadata;
     if (id.startsWith('temp')) return this.gistempProvider.getMetadata();
@@ -150,6 +206,16 @@ class DatasetService {
     if (id === 'energy-ceres-albedo-toa') return this.ceresProvider.getAlbedoMetadata();
     if (id.startsWith('energy-ceres')) return this.ceresProvider.getMetadata();
     if (id.startsWith('volcano')) return this.volcanoProvider.getMetadata();
+    if (id === 'seaice-antarctic-february-nsidc') return this.seaIceProvider.getAntarcticMetadata();
+    if (id === 'seaice-arctic-march-nsidc') return this.seaIceProvider.getArcticMarchMetadata();
+    if (id.startsWith('seaice')) return this.seaIceProvider.getMetadata();
+    if (id === 'zonal-temp-northmid-era5') return this.zonalProvider.getNorthMidMetadata();
+    if (id === 'zonal-temp-tropics-era5') return this.zonalProvider.getTropicsMetadata();
+    if (id === 'zonal-temp-southmid-era5') return this.zonalProvider.getSouthMidMetadata();
+    if (id === 'zonal-temp-antarctic-era5') return this.zonalProvider.getAntarcticMetadata();
+    if (id.startsWith('zonal')) return this.zonalProvider.getMetadata();
+    if (id === 'aerosols-so2-emissions-ceds') return this.aerosolsProvider.getSo2Metadata();
+    if (id.startsWith('aerosols')) return this.aerosolsProvider.getMetadata();
     return this.nasaPowerProvider.getMetadata();
   }
 
@@ -158,15 +224,28 @@ class DatasetService {
       this.lisirdProvider.getMetadata(),
       this.lisirdProvider.getSunspotsData().metadata,
       this.noaaProvider.getMetadata(),
+      this.noaaGhgProvider.getMetadata(),
+      this.noaaGhgProvider.getN2oMetadata(),
+      this.noaaGhgProvider.getAggiMetadata(),
       this.gistempProvider.getMetadata(),
       this.gistempProvider.getAlternativeDataset('noaa').metadata,
       this.gistempProvider.getAlternativeDataset('berkeley').metadata,
+      this.zonalProvider.getMetadata(),
+      this.zonalProvider.getNorthMidMetadata(),
+      this.zonalProvider.getTropicsMetadata(),
+      this.zonalProvider.getSouthMidMetadata(),
+      this.zonalProvider.getAntarcticMetadata(),
+      this.seaIceProvider.getMetadata(),
+      this.seaIceProvider.getAntarcticMetadata(),
+      this.seaIceProvider.getArcticMarchMetadata(),
       this.argoProvider.getMetadata(),
       this.argoProvider.get700mMetadata(),
       this.ceresProvider.getMetadata(),
       this.ceresProvider.getOlrMetadata(),
       this.ceresProvider.getAlbedoMetadata(),
       this.volcanoProvider.getMetadata(),
+      this.aerosolsProvider.getMetadata(),
+      this.aerosolsProvider.getSo2Metadata(),
       this.nasaPowerProvider.getMetadata(),
     ];
   }

@@ -151,6 +151,96 @@ export const HowToReadPage: React.FC = () => {
             </div>
           </div>
         </section>
+
+        {/* 8. CH4, N2O et Pouvoir de Réchauffement Global (PRG / GWP) */}
+        <section className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-xl">
+          <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2 font-sans">
+            <span className="text-emerald-400">🧪</span>
+            8. Les Gaz à Effet de Serre au-delà du CO₂ : Méthane (CH₄), N₂O et notion de PRG
+          </h3>
+          <p className="leading-relaxed mb-3">
+            Si le $CO_2$ représente environ les deux tiers du forçage anthropique direct, d'autres gaz jouent un rôle déterminant avec des dynamiques physiques distinctes :
+          </p>
+          <div className="space-y-2 text-xs text-slate-300">
+            <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+              <strong className="text-emerald-300 font-mono block mb-1">Durée de vie vs Puissance radiative instantanée :</strong>
+              Le <strong>méthane (CH₄)</strong> a une durée de vie atmosphérique courte d'environ <strong>11,8 ans</strong> (détruit par les radicaux hydroxyles •OH), mais son pouvoir réchauffant par molécule est très élevé. Le GIEC définit le Potentiel de Réchauffement Global (PRG) : <strong>84 fois supérieur au CO₂ sur 20 ans</strong> et <strong>28 fois sur 100 ans</strong>.
+            </div>
+            <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+              <strong className="text-indigo-300 font-mono block mb-1">Le protoxyde d'azote (N₂O) :</strong>
+              Avec une durée de vie d'environ <strong>114 ans</strong> et un PRG-100 de <strong>273</strong>, le N₂O (lié aux engrais azotés agricoles) cumule longue persistance et fort pouvoir réchauffant, en plus de participer à l'appauvrissement de la couche d'ozone.
+            </div>
+            <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+              <strong className="text-amber-300 font-mono block mb-1">L'indice NOAA AGGI :</strong>
+              L'indice officiel <em>Annual Greenhouse Gas Index</em> de la NOAA mesure l'accroissement du forçage direct cumulé depuis 1990 (base 1.000). Il a franchi <strong>1,63 en 2025</strong>, indiquant une augmentation de +63 % de l'excédent thermique direct piégé par l'atmosphère.
+            </div>
+          </div>
+        </section>
+
+        {/* 9. Cryosphère & Rétroaction Glace-Albédo */}
+        <section className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-xl">
+          <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2 font-sans">
+            <span className="text-cyan-400">🧊</span>
+            9. Cryosphère, Banquise et rétroaction physique de l'albédo glace-océan
+          </h3>
+          <p className="leading-relaxed mb-3">
+            La banquise joue le rôle de miroir thermique de la Terre grâce à son albédo élevé :
+          </p>
+          <div className="space-y-2 text-xs text-slate-300">
+            <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+              <strong className="text-cyan-300 font-mono block mb-1">Rétroaction positive (Ice-Albedo Feedback) :</strong>
+              Une banquise recouverte de neige renvoie 70 % à 85 % du rayonnement solaire vers l'espace (<span className="text-cyan-400 font-mono">α ≈ 0,70–0,85</span>).
+              Lorsque la température s'élève et que la glace fond, l'océan liquide sombre absorbe 94 % de l'énergie solaire (<span className="text-rose-400 font-mono">α ≈ 0,06</span>).
+              Cette absorption supplémentaire réchauffe l'océan, accélérant en retour la fonte de la glace restante.
+            </div>
+            <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+              <strong className="text-cyan-300 font-mono block mb-1">Tendance décennale et point de bascule :</strong>
+              Le minimum de septembre en Arctique décline au rythme de <strong>-12,2 % par décennie</strong> depuis le début des mesures satellites en 1979. Le record bas absolu a été atteint en septembre 2012 avec seulement 3,39 millions de km² résiduels.
+            </div>
+          </div>
+        </section>
+
+        {/* 10. Réanalyses ERA5 & Amplification Arctique */}
+        <section className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-xl">
+          <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2 font-sans">
+            <span className="text-violet-400">🌎</span>
+            10. Réanalyses ERA5 & Mécanismes de l'Amplification Polaire
+          </h3>
+          <p className="leading-relaxed mb-3">
+            La décomposition des températures par bande de latitude révèle que le réchauffement n'est pas homogène :
+          </p>
+          <div className="space-y-2 text-xs text-slate-300">
+            <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+              <strong className="text-violet-300 font-mono block mb-1">Facteur 3× à 4× :</strong>
+              Tandis que la moyenne mondiale a augmenté de +1,3 °C à +1,4 °C par rapport à l'ère préindustrielle, le bassin arctique (90°N–64°N) enregistre des anomalies annuelles supérieures à +3,5 °C. Ce rapport s'appelle l'<em>amplification arctique</em>.
+            </div>
+            <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+              <strong className="text-violet-300 font-mono block mb-1">Rétroaction du gradient vertical (Lapse-Rate Feedback) :</strong>
+              Dans les tropiques, la chaleur au sol s'élève facilement par convection jusqu'en haute altitude et rayonne vers l'espace. En Arctique, une forte inversion thermique stabilise l'atmosphère, emprisonnant la chaleur dans les premiers centaines de mètres au-dessus du sol.
+            </div>
+          </div>
+        </section>
+
+        {/* 11. Aérosols Troposphériques & Paradoxe de la Dépollution */}
+        <section className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-xl">
+          <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2 font-sans">
+            <span className="text-sky-400">☁️</span>
+            11. Aérosols Troposphériques, Effet Twomey et Paradoxe de la Dépollution
+          </h3>
+          <p className="leading-relaxed mb-3">
+            Les aérosols d'origine humaine exercent un forçage radiatif négatif puissant qui compense en partie l'effet de serre :
+          </p>
+          <div className="space-y-2 text-xs text-slate-300">
+            <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+              <strong className="text-sky-300 font-mono block mb-1">Effet parasol direct et indirect (Twomey) :</strong>
+              Les sulfates et poussières diffusent la lumière du soleil (effet direct ~ -0,3 W/m²). En servant de noyaux de condensation nuageuse, ils augmentent la concentration de gouttelettes, rendant les nuages plus blancs, plus réfléchissants et plus persistants (effet indirect ~ -0,8 W/m²).
+            </div>
+            <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+              <strong className="text-amber-300 font-mono block mb-1">Le paradoxe du démasquage (IMO 2020) :</strong>
+              La dépollution de l'air (réduction du soufre dans les carburants marins par l'OMI en 2020, fermetures de centrales à charbon) supprime rapidement ces aérosols dont la durée de vie n'est que de quelques jours, ce qui « démasque » instantanément une partie du réchauffement sous-jacent latent (+0,3 °C à +0,5 °C).
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );

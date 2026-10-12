@@ -12,9 +12,12 @@ import { DashboardPage } from './pages/DashboardPage';
 import { SolarPage } from './pages/SolarPage';
 import { Co2Page } from './pages/Co2Page';
 import { TemperaturePage } from './pages/TemperaturePage';
+import { ZonalPage } from './pages/ZonalPage';
+import { SeaIcePage } from './pages/SeaIcePage';
 import { ArgoPage } from './pages/ArgoPage';
 import { CeresPage } from './pages/CeresPage';
 import { VolcanoPage } from './pages/VolcanoPage';
+import { AerosolsPage } from './pages/AerosolsPage';
 import { NasaPowerPage } from './pages/NasaPowerPage';
 import { ComparatorPage } from './pages/ComparatorPage';
 import { SourcesPage } from './pages/SourcesPage';
@@ -34,9 +37,12 @@ export default function App() {
         {currentTab === 'solar' && <SolarPage />}
         {currentTab === 'co2' && <Co2Page />}
         {currentTab === 'temperature' && <TemperaturePage />}
+        {currentTab === 'zonal' && <ZonalPage />}
+        {currentTab === 'ice' && <SeaIcePage />}
         {currentTab === 'ocean' && <ArgoPage />}
         {currentTab === 'ceres' && <CeresPage />}
         {currentTab === 'volcano' && <VolcanoPage />}
+        {currentTab === 'aerosols' && <AerosolsPage />}
         {currentTab === 'power' && <NasaPowerPage />}
         {currentTab === 'comparator' && <ComparatorPage />}
         {currentTab === 'sources' && <SourcesPage />}

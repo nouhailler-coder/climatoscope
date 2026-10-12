@@ -1,16 +1,19 @@
 import React from 'react';
 import { PWAInstallButton } from './PWAInstallButton';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
-import { Activity, Sun, Flame, Thermometer, Radio, Waves, Globe, Mountain, Scale, BookOpen, HelpCircle } from 'lucide-react';
+import { Activity, Sun, Flame, Thermometer, Radio, Waves, Globe, Mountain, Scale, BookOpen, HelpCircle, Compass, Cloud } from 'lucide-react';
 
 export type NavTab =
   | 'dashboard'
   | 'solar'
   | 'co2'
   | 'temperature'
+  | 'zonal'
+  | 'ice'
   | 'ocean'
   | 'ceres'
   | 'volcano'
+  | 'aerosols'
   | 'power'
   | 'comparator'
   | 'sources'
@@ -27,11 +30,14 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onSelectTab }) => {
   const navItems: Array<{ id: NavTab; label: string; icon: React.ReactNode }> = [
     { id: 'dashboard', label: 'Observatoire', icon: <Activity className="w-4 h-4" /> },
     { id: 'solar', label: 'Soleil', icon: <Sun className="w-4 h-4 text-amber-400" /> },
-    { id: 'co2', label: 'CO₂', icon: <Flame className="w-4 h-4 text-emerald-400" /> },
+    { id: 'co2', label: 'CO₂ & GES', icon: <Flame className="w-4 h-4 text-emerald-400" /> },
     { id: 'temperature', label: 'Température', icon: <Thermometer className="w-4 h-4 text-rose-400" /> },
+    { id: 'zonal', label: 'Zonal ERA5', icon: <Globe className="w-4 h-4 text-violet-400" /> },
+    { id: 'ice', label: 'Banquise', icon: <Compass className="w-4 h-4 text-cyan-300" /> },
     { id: 'ocean', label: 'Océans', icon: <Waves className="w-4 h-4 text-blue-400" /> },
     { id: 'ceres', label: 'CERES', icon: <Globe className="w-4 h-4 text-amber-300" /> },
     { id: 'volcano', label: 'Volcans', icon: <Mountain className="w-4 h-4 text-orange-400" /> },
+    { id: 'aerosols', label: 'Aérosols', icon: <Cloud className="w-4 h-4 text-sky-400" /> },
     { id: 'power', label: 'NASA POWER', icon: <Radio className="w-4 h-4 text-cyan-400" /> },
     { id: 'comparator', label: 'Comparateur', icon: <Scale className="w-4 h-4 text-indigo-400" /> },
     { id: 'sources', label: 'Sources', icon: <BookOpen className="w-4 h-4" /> },
@@ -57,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onSelectTab }) => {
                 <div className="flex items-center gap-2">
                   <h1 className="text-base font-bold tracking-tight text-white font-sans flex items-center gap-1.5">
                     Climat<span className="text-cyan-400">OSCOPE</span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-orange-950/80 text-orange-400 border border-orange-800/60 font-semibold">v0.4</span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 font-semibold">v0.6</span>
                   </h1>
                 </div>
                 <p className="text-[11px] text-slate-400 font-mono tracking-tight hidden sm:block">

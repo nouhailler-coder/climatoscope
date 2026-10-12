@@ -17,6 +17,8 @@ import {
   Info,
   CheckCircle2,
   Database,
+  Compass,
+  Cloud,
 } from 'lucide-react';
 
 interface DashboardPageProps {
@@ -26,22 +28,30 @@ interface DashboardPageProps {
 export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   const tsi = useDataset('solar-tsi-lisird');
   const co2 = useDataset('co2-noaa-mauna-loa');
+  const ch4 = useDataset('ghg-ch4-noaa');
   const temp = useDataset('temp-nasa-gistemp');
+  const zonal = useDataset('zonal-temp-arctic-era5');
+  const ice = useDataset('seaice-arctic-september-nsidc');
   const ocean = useDataset('ocean-ohc-argo-2000m');
   const ceres = useDataset('energy-ceres-net-toa');
   const volcano = useDataset('volcano-saod-giss');
+  const aerosols = useDataset('aerosols-cams-total-aod');
   const power = useDataset('nasa-power-radiation');
 
   // Extracts latest value
   const latestTsi = tsi.dataset?.data[tsi.dataset.data.length - 1];
   const latestCo2 = co2.dataset?.data[co2.dataset.data.length - 1];
+  const latestCh4 = ch4.dataset?.data[ch4.dataset.data.length - 1];
   const prevCo2 = co2.dataset?.data[co2.dataset.data.length - 13]; // 1 year before
   const co2DeltaYear = latestCo2 && prevCo2 ? latestCo2.value - prevCo2.value : 2.45;
 
   const latestTemp = temp.dataset?.data[temp.dataset.data.length - 1];
+  const latestZonal = zonal.dataset?.data[zonal.dataset.data.length - 1];
+  const latestIce = ice.dataset?.data[ice.dataset.data.length - 1];
   const latestOcean = ocean.dataset?.data[ocean.dataset.data.length - 1];
   const latestCeres = ceres.dataset?.data[ceres.dataset.data.length - 1];
   const latestVolcano = volcano.dataset?.data[volcano.dataset.data.length - 1];
+  const latestAerosols = aerosols.dataset?.data[aerosols.dataset.data.length - 1];
   const latestPower = power.dataset?.data[power.dataset.data.length - 1];
 
   return (
@@ -92,7 +102,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           <h3 className="text-sm font-mono uppercase tracking-wider text-slate-400">
             Piliers d'Observation Principaux
           </h3>
-          <span className="text-xs font-mono text-slate-400">4 modules certifiés</span>
+          <span className="text-xs font-mono text-slate-400">10 modules d'observation certifiés</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -139,7 +149,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          {/* Card 2: 🧪 CO₂ */}
+          {/* Card 2: 🧪 Gaz à Effet de Serre (CO₂, CH₄, N₂O) */}
           <div
             onClick={() => onNavigate('co2')}
             className="group bg-slate-900/70 hover:bg-slate-900/90 border border-slate-800 hover:border-emerald-500/40 rounded-2xl p-5 transition cursor-pointer shadow-lg"
@@ -151,7 +161,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 </div>
                 <div>
                   <h4 className="text-base font-bold text-slate-100 group-hover:text-emerald-300 transition">
-                    CO₂ Atmosphérique (Mauna Loa)
+                    Gaz à Effet de Serre (CO₂, CH₄, N₂O)
                   </h4>
                   <p className="text-xs text-slate-400 font-mono">NOAA Global Monitoring Laboratory</p>
                 </div>
@@ -161,23 +171,23 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
             <div className="grid grid-cols-2 gap-3 mb-4 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
               <div>
-                <span className="text-[11px] text-slate-400 font-mono block">Concentration actuelle :</span>
+                <span className="text-[11px] text-slate-400 font-mono block">CO₂ (Mauna Loa) :</span>
                 <span className="text-lg font-bold text-slate-100 font-mono">
                   {formatScientificValue(latestCo2?.value, 'ppm', 2)}
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">{latestCo2?.timestamp}</span>
+                <span className="text-[10px] text-emerald-400 block font-mono">+{formatScientificValue(co2DeltaYear, 'ppm/an', 2)}</span>
               </div>
               <div>
-                <span className="text-[11px] text-slate-400 font-mono block">Taux d'accroissement :</span>
-                <span className="text-sm font-semibold text-emerald-300 font-mono mt-1 block">
-                  +{formatScientificValue(co2DeltaYear, 'ppm/an', 2)}
+                <span className="text-[11px] text-slate-400 font-mono block">CH₄ (Méthane global) :</span>
+                <span className="text-lg font-bold text-amber-300 font-mono">
+                  {formatScientificValue(latestCh4?.value, 'ppb', 1)}
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">1958: 315 ppm</span>
+                <span className="text-[10px] text-slate-400 block font-mono">+174% / préind.</span>
               </div>
             </div>
 
             <div className="flex items-center justify-between text-xs text-slate-400 group-hover:text-emerald-300 transition font-medium">
-              <span>Voir la courbe de Keeling & cycle saisonnier</span>
+              <span>Explorer CO₂, CH₄, N₂O & l'indice AGGI</span>
               <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition" />
             </div>
           </div>
@@ -393,6 +403,135 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
             <div className="flex items-center justify-between text-xs text-slate-400 group-hover:text-cyan-300 transition font-medium">
               <span>Sélecteur mondial de coordonnées & requêtes en direct</span>
+              <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition" />
+            </div>
+          </div>
+
+          {/* Card 8: 🧊 Cryosphère & Banquise (NSIDC) */}
+          <div
+            onClick={() => onNavigate('ice')}
+            className="group bg-slate-900/70 hover:bg-slate-900/90 border border-slate-800 hover:border-cyan-500/40 rounded-2xl p-5 transition cursor-pointer shadow-lg"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-cyan-950/60 border border-cyan-700/40 flex items-center justify-center text-cyan-300 group-hover:scale-105 transition">
+                  <Compass className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-base font-bold text-slate-100 group-hover:text-cyan-300 transition">
+                    Cryosphère & Banquise — NSIDC / NASA
+                  </h4>
+                  <p className="text-xs text-slate-400 font-mono">Micro-ondes satellites / Rétroaction d'albédo</p>
+                </div>
+              </div>
+              <StatusBadge status={ice.status} compact />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-4 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+              <div>
+                <span className="text-[11px] text-slate-400 font-mono block">Minimum Arctique (Sept.) :</span>
+                <span className="text-lg font-bold text-cyan-300 font-mono">
+                  {latestIce?.value} M km²
+                </span>
+                <span className="text-[10px] text-rose-400 block font-mono">-12,2% / décennie</span>
+              </div>
+              <div>
+                <span className="text-[11px] text-slate-400 font-mono block">Rétroaction d'albédo :</span>
+                <span className="text-sm font-semibold text-slate-200 font-mono mt-1 block">
+                  α: 0,70 → 0,06
+                </span>
+                <span className="text-[10px] text-slate-400 block font-mono">Eau libre absorbe 94%</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-xs text-slate-400 group-hover:text-cyan-300 transition font-medium">
+              <span>Voir les séries Arctique / Antarctique & simulateur d'albédo</span>
+              <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition" />
+            </div>
+          </div>
+
+          {/* Card 9: 🌎 Réanalyses ERA5 & Amplification Polaire */}
+          <div
+            onClick={() => onNavigate('zonal')}
+            className="group bg-slate-900/70 hover:bg-slate-900/90 border border-slate-800 hover:border-violet-500/40 rounded-2xl p-5 transition cursor-pointer shadow-lg"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-violet-950/60 border border-violet-700/40 flex items-center justify-center text-violet-400 group-hover:scale-105 transition">
+                  <Globe className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-base font-bold text-slate-100 group-hover:text-violet-300 transition">
+                    Amplification Polaire — Copernicus ERA5
+                  </h4>
+                  <p className="text-xs text-slate-400 font-mono">Gradient latitudinal & réanalyses ECMWF</p>
+                </div>
+              </div>
+              <StatusBadge status={zonal.status} compact />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-4 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+              <div>
+                <span className="text-[11px] text-slate-400 font-mono block">Arctique (90°N–64°N) :</span>
+                <span className="text-lg font-bold text-rose-400 font-mono">
+                  +{latestZonal?.value} °C
+                </span>
+                <span className="text-[10px] text-slate-400 block font-mono">Ref. 1951-1980</span>
+              </div>
+              <div>
+                <span className="text-[11px] text-slate-400 font-mono block">Facteur d'amplification :</span>
+                <span className="text-sm font-semibold text-violet-300 font-mono mt-1 block">
+                  ~3,0× à 3,8×
+                </span>
+                <span className="text-[10px] text-slate-400 block font-mono">plus rapide que le globe</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-xs text-slate-400 group-hover:text-violet-300 transition font-medium">
+              <span>Explorer les 5 bandes latitudinales & mécanismes physiques</span>
+              <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition" />
+            </div>
+          </div>
+
+          {/* Card 10: ☁️ Aérosols Troposphériques (CAMS / AERONET) */}
+          <div
+            onClick={() => onNavigate('aerosols')}
+            className="group bg-slate-900/70 hover:bg-slate-900/90 border border-slate-800 hover:border-sky-500/40 rounded-2xl p-5 transition cursor-pointer shadow-lg"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-sky-950/60 border border-sky-700/40 flex items-center justify-center text-sky-400 group-hover:scale-105 transition">
+                  <Cloud className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-base font-bold text-slate-100 group-hover:text-sky-300 transition">
+                    Aérosols Troposphériques — CAMS / AERONET
+                  </h4>
+                  <p className="text-xs text-slate-400 font-mono">Spéciation AOD & Paradoxe de la dépollution</p>
+                </div>
+              </div>
+              <StatusBadge status={aerosols.status} compact />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-4 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+              <div>
+                <span className="text-[11px] text-slate-400 font-mono block">AOD Troposphérique :</span>
+                <span className="text-lg font-bold text-sky-300 font-mono">
+                  {latestAerosols?.value}
+                </span>
+                <span className="text-[10px] text-slate-400 block font-mono">à 550 nm (Copernicus)</span>
+              </div>
+              <div>
+                <span className="text-[11px] text-slate-400 font-mono block">Forçage net masquant :</span>
+                <span className="text-sm font-semibold text-cyan-300 font-mono mt-1 block">
+                  ~ -1,1 W/m²
+                </span>
+                <span className="text-[10px] text-slate-400 block font-mono">Effet parasol (Twomey)</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-xs text-slate-400 group-hover:text-sky-300 transition font-medium">
+              <span>Voir la spéciation chimique & simulateur de démasquage</span>
               <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition" />
             </div>
           </div>
