@@ -16,6 +16,7 @@ export const ComparatorPage: React.FC = () => {
   const ceres = useDataset('energy-ceres-net-toa');
   const volcano = useDataset('volcano-saod-giss');
   const ice = useDataset('seaice-arctic-september-nsidc');
+  const antarcticIce = useDataset('seaice-antarctic-february-nsidc');
   const zonal = useDataset('zonal-temp-arctic-era5');
   const aerosols = useDataset('aerosols-cams-total-aod');
   const power = useDataset('nasa-power-radiation');
@@ -30,6 +31,7 @@ export const ComparatorPage: React.FC = () => {
     'temp-nasa-gistemp': true,
     'zonal-temp-arctic-era5': false,
     'seaice-arctic-september-nsidc': false,
+    'seaice-antarctic-february-nsidc': false,
     'ocean-ohc-argo-2000m': false,
     'energy-ceres-net-toa': false,
     'volcano-saod-giss': false,
@@ -300,6 +302,29 @@ export const ComparatorPage: React.FC = () => {
       data: ice.dataset?.data || [],
       color: '#06b6d4', // cyan
       enabled: !!enabledMap['seaice-arctic-september-nsidc'],
+    },
+    {
+      id: 'seaice-antarctic-february-nsidc',
+      metadata: antarcticIce.dataset?.metadata || {
+        id: 'seaice-antarctic-february-nsidc',
+        name: 'Banquise Antarctique (Février)',
+        shortName: '🧊 Banquise Antarctique',
+        organization: 'NSIDC / NASA',
+        source: 'NSIDC v3',
+        sourceUrl: '',
+        variable: 'Extent',
+        variableSymbol: 'SIE_Ant',
+        unit: 'M km²',
+        unitSymbol: 'M km²',
+        frequency: 'annual',
+        startDate: '1979',
+        endDate: '2025',
+        retrievedAt: '',
+        description: '',
+      },
+      data: antarcticIce.dataset?.data || [],
+      color: '#818cf8', // indigo
+      enabled: !!enabledMap['seaice-antarctic-february-nsidc'],
     },
     {
       id: 'aerosols-cams-total-aod',

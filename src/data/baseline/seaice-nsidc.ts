@@ -21,9 +21,9 @@ export const NSIDC_ARCTIC_SEPT_METADATA: DatasetMetadata = {
   unitSymbol: 'M km²',
   frequency: 'annual',
   startDate: '1979',
-  endDate: '2024',
+  endDate: '2025',
   baselinePeriod: '1981-2010 (Moyenne = 6,41 M km²)',
-  retrievedAt: '2025-01-20T00:00:00Z',
+  retrievedAt: '2025-02-28T00:00:00Z',
   license: 'Open Data NASA / NOAA / NSIDC (Creative Commons Attribution 4.0)',
   description:
     'Mesure satellite par radiométrie micro-ondes passive de l’étendue de la banquise au pôle Nord à la fin de la saison de fonte estivale (septembre). Représente le volume de glace pluriannuelle résiduelle et constitue le marqueur le plus emblématique de la cryosphère.',
@@ -43,9 +43,9 @@ export const NSIDC_ANTARCTIC_FEB_METADATA: DatasetMetadata = {
   unitSymbol: 'M km²',
   frequency: 'annual',
   startDate: '1979',
-  endDate: '2024',
+  endDate: '2025',
   baselinePeriod: '1981-2010 (Moyenne = 2,87 M km²)',
-  retrievedAt: '2025-01-20T00:00:00Z',
+  retrievedAt: '2025-02-28T00:00:00Z',
   license: 'Open Data NASA / NSIDC',
   description:
     'Mesure satellite par micro-ondes passives du minimum estival de la banquise australe entourant le continent Antarctique en février. Fortement influencée par les vents catabatiques, l’oscillation SAM (Southern Annular Mode) et l’océan Austral.',
@@ -64,10 +64,30 @@ export const NSIDC_ARCTIC_MARCH_METADATA: DatasetMetadata = {
   unitSymbol: 'M km²',
   frequency: 'annual',
   startDate: '1979',
-  endDate: '2024',
+  endDate: '2025',
   baselinePeriod: '1981-2010 (Moyenne = 15,43 M km²)',
-  retrievedAt: '2025-01-20T00:00:00Z',
+  retrievedAt: '2025-02-28T00:00:00Z',
   description: 'Étendue maximale annuelle atteinte par la glace de mer boréale à la fin de la nuit polaire en mars.',
+};
+
+export const NSIDC_SEASONAL_CYCLE_METADATA: DatasetMetadata = {
+  id: 'seaice-seasonal-cycle-nsidc',
+  name: 'Cycle Saisonnier Mensuel de la Banquise (NSIDC / NASA)',
+  shortName: 'Cycle Saisonnier Banquise',
+  organization: 'NSIDC / NASA GSFC',
+  source: 'NSIDC Sea Ice Index (G02135, Version 3)',
+  sourceUrl: 'https://nsidc.org/data/seaice_index',
+  methodologyUrl: 'https://nsidc.org/data/g02135/versions/3',
+  variable: 'Étendue mensuelle climatologique',
+  variableSymbol: 'SIE_Seasonal',
+  unit: 'Millions de km²',
+  unitSymbol: 'M km²',
+  frequency: 'monthly',
+  startDate: '1981',
+  endDate: '2025',
+  baselinePeriod: '1981-2010 vs 2011-2025',
+  retrievedAt: '2025-02-28T00:00:00Z',
+  description: 'Cycle saisonnier mensuel comparatif de l’étendue de la banquise arctique et antarctique (Moyenne 1981-2010 vs Période contemporaine).',
 };
 
 /**
@@ -101,7 +121,7 @@ export const antarcticFebruaryExtentData: Array<[number, number]> = [
   [2009, 2.88], [2010, 3.05], [2011, 2.50], [2012, 3.25], [2013, 3.68],
   [2014, 3.60], [2015, 3.58], [2016, 2.63], [2017, 2.29], [2018, 2.33],
   [2019, 2.47], [2020, 2.69], [2021, 2.62], [2022, 1.92], [2023, 1.79],
-  [2024, 1.98],
+  [2024, 1.98], [2025, 1.95],
 ];
 
 /**
@@ -112,10 +132,11 @@ export const arcticMarchExtentData: Array<[number, number]> = [
   [1995, 15.22], [2000, 15.30], [2005, 14.73], [2010, 15.14],
   [2015, 14.41], [2017, 14.42], [2019, 14.78], [2020, 15.05],
   [2021, 14.77], [2022, 14.88], [2023, 14.62], [2024, 14.72],
+  [2025, 14.68],
 ];
 
 /**
- * Monthly seasonal cycle averages (1981-2010 baseline vs 2011-2024 modern)
+ * Monthly seasonal cycle averages (1981-2010 baseline vs 2011-2025 modern)
  * Month (1 to 12) -> Extent in Millions of km²
  */
 export interface SeasonalCycleMonth {
@@ -129,14 +150,14 @@ export interface SeasonalCycleMonth {
 
 export const SEASONAL_CYCLE_MONTHS: SeasonalCycleMonth[] = [
   { month: 1, monthName: 'Jan', arcticBaseline: 14.4, arcticRecent: 13.5, antarcticBaseline: 4.8, antarcticRecent: 4.0 },
-  { month: 2, monthName: 'Fév', arcticBaseline: 15.3, arcticRecent: 14.4, antarcticBaseline: 2.9, antarcticRecent: 2.1 },
+  { month: 2, monthName: 'Fév', arcticBaseline: 15.3, arcticRecent: 14.4, antarcticBaseline: 2.9, antarcticRecent: 2.0 },
   { month: 3, monthName: 'Mar', arcticBaseline: 15.4, arcticRecent: 14.7, antarcticBaseline: 4.1, antarcticRecent: 3.4 },
   { month: 4, monthName: 'Avr', arcticBaseline: 14.7, arcticRecent: 13.9, antarcticBaseline: 6.9, antarcticRecent: 6.2 },
   { month: 5, monthName: 'Mai', arcticBaseline: 13.1, arcticRecent: 12.1, antarcticBaseline: 9.8, antarcticRecent: 8.9 },
   { month: 6, monthName: 'Juin', arcticBaseline: 11.5, arcticRecent: 10.4, antarcticBaseline: 12.4, antarcticRecent: 11.6 },
   { month: 7, monthName: 'Juil', arcticBaseline: 9.2, arcticRecent: 7.9, antarcticBaseline: 14.8, antarcticRecent: 14.0 },
   { month: 8, monthName: 'Août', arcticBaseline: 7.2, arcticRecent: 5.5, antarcticBaseline: 16.7, antarcticRecent: 15.9 },
-  { month: 9, monthName: 'Sep', arcticBaseline: 6.4, arcticRecent: 4.4, antarcticBaseline: 18.5, antarcticRecent: 17.1 },
+  { month: 9, monthName: 'Sep', arcticBaseline: 6.4, arcticRecent: 4.3, antarcticBaseline: 18.5, antarcticRecent: 17.1 },
   { month: 10, monthName: 'Oct', arcticBaseline: 8.3, arcticRecent: 6.5, antarcticBaseline: 18.0, antarcticRecent: 16.8 },
   { month: 11, monthName: 'Nov', arcticBaseline: 10.6, arcticRecent: 9.3, antarcticBaseline: 15.9, antarcticRecent: 14.6 },
   { month: 12, monthName: 'Déc', arcticBaseline: 13.0, arcticRecent: 11.9, antarcticBaseline: 10.5, antarcticRecent: 9.0 },
@@ -165,6 +186,19 @@ export function getArcticMarchData(): TimeSeriesPoint[] {
     timestamp: `${year}`,
     value: val,
     uncertainty: 0.05,
+    qualityFlag: 'valid',
+  }));
+}
+
+export function getSeasonalCycleMonths(): SeasonalCycleMonth[] {
+  return [...SEASONAL_CYCLE_MONTHS];
+}
+
+export function getSeasonalCycleData(): TimeSeriesPoint[] {
+  return SEASONAL_CYCLE_MONTHS.map((m) => ({
+    timestamp: `${m.month.toString().padStart(2, '0')}`,
+    value: m.arcticRecent,
+    uncertainty: 0.1,
     qualityFlag: 'valid',
   }));
 }

@@ -39,20 +39,41 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   const power = useDataset('nasa-power-radiation');
 
   // Extracts latest value
-  const latestTsi = tsi.dataset?.data[tsi.dataset.data.length - 1];
-  const latestCo2 = co2.dataset?.data[co2.dataset.data.length - 1];
-  const latestCh4 = ch4.dataset?.data[ch4.dataset.data.length - 1];
-  const prevCo2 = co2.dataset?.data[co2.dataset.data.length - 13]; // 1 year before
-  const co2DeltaYear = latestCo2 && prevCo2 ? latestCo2.value - prevCo2.value : 2.45;
+  const latestTsi = tsi.dataset?.data && tsi.dataset.data.length > 0 ? tsi.dataset.data[tsi.dataset.data.length - 1] : undefined;
+  const co2Data = co2.dataset?.data;
+  const latestCo2 = co2Data && co2Data.length > 0 ? co2Data[co2Data.length - 1] : undefined;
+  const latestCh4 = ch4.dataset?.data && ch4.dataset.data.length > 0 ? ch4.dataset.data[ch4.dataset.data.length - 1] : undefined;
 
-  const latestTemp = temp.dataset?.data[temp.dataset.data.length - 1];
-  const latestZonal = zonal.dataset?.data[zonal.dataset.data.length - 1];
-  const latestIce = ice.dataset?.data[ice.dataset.data.length - 1];
-  const latestOcean = ocean.dataset?.data[ocean.dataset.data.length - 1];
-  const latestCeres = ceres.dataset?.data[ceres.dataset.data.length - 1];
-  const latestVolcano = volcano.dataset?.data[volcano.dataset.data.length - 1];
-  const latestAerosols = aerosols.dataset?.data[aerosols.dataset.data.length - 1];
-  const latestPower = power.dataset?.data[power.dataset.data.length - 1];
+  // Calculate CO2 variation over 1 year strictly from loaded observations
+  const prevCo2 = React.useMemo(() => {
+    if (!co2Data || co2Data.length < 2 || !latestCo2) return undefined;
+    if (latestCo2.timestamp.includes('-')) {
+      const [yearStr, monthStr] = latestCo2.timestamp.split('-');
+      const targetTimestamp = `${parseInt(yearStr, 10) - 1}-${monthStr}`;
+      const found = co2Data.find((p) => p.timestamp === targetTimestamp);
+      if (found) return found;
+      if (co2Data.length >= 13) return co2Data[co2Data.length - 13];
+    } else {
+      const targetYear = `${parseInt(latestCo2.timestamp, 10) - 1}`;
+      const found = co2Data.find((p) => p.timestamp === targetYear);
+      if (found) return found;
+      return co2Data[co2Data.length - 2];
+    }
+    return undefined;
+  }, [co2Data, latestCo2]);
+
+  const co2DeltaYear = latestCo2 && prevCo2 ? latestCo2.value - prevCo2.value : null;
+
+  const latestTemp = temp.dataset?.data && temp.dataset.data.length > 0 ? temp.dataset.data[temp.dataset.data.length - 1] : undefined;
+  const preindustrialAnomaly = latestTemp?.value != null ? Number((latestTemp.value + 0.28).toFixed(2)) : null;
+
+  const latestZonal = zonal.dataset?.data && zonal.dataset.data.length > 0 ? zonal.dataset.data[zonal.dataset.data.length - 1] : undefined;
+  const latestIce = ice.dataset?.data && ice.dataset.data.length > 0 ? ice.dataset.data[ice.dataset.data.length - 1] : undefined;
+  const latestOcean = ocean.dataset?.data && ocean.dataset.data.length > 0 ? ocean.dataset.data[ocean.dataset.data.length - 1] : undefined;
+  const latestCeres = ceres.dataset?.data && ceres.dataset.data.length > 0 ? ceres.dataset.data[ceres.dataset.data.length - 1] : undefined;
+  const latestVolcano = volcano.dataset?.data && volcano.dataset.data.length > 0 ? volcano.dataset.data[volcano.dataset.data.length - 1] : undefined;
+  const latestAerosols = aerosols.dataset?.data && aerosols.dataset.data.length > 0 ? aerosols.dataset.data[aerosols.dataset.data.length - 1] : undefined;
+  const latestPower = power.dataset?.data && power.dataset.data.length > 0 ? power.dataset.data[power.dataset.data.length - 1] : undefined;
 
   return (
     <div className="space-y-8">
@@ -130,9 +151,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Irradiance Totale (TSI) :</span>
                 <span className="text-lg font-bold text-slate-100 font-mono">
-                  {formatScientificValue(latestTsi?.value, 'W/m²', 2)}
+                  {latestTsi?.value != null ? formatScientificValue(latestTsi.value, 'W/m²', 2) : 'Donnée indisponible'}
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">Année {latestTsi?.timestamp}</span>
+                <span className="text-[10px] text-slate-400 block font-mono">
+                  {latestTsi?.timestamp ? `Année ${latestTsi.timestamp}` : 'Donnée indisponible'}
+                </span>
               </div>
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Cycle de Schwabe :</span>
@@ -173,16 +196,28 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">CO₂ (Mauna Loa) :</span>
                 <span className="text-lg font-bold text-slate-100 font-mono">
-                  {formatScientificValue(latestCo2?.value, 'ppm', 2)}
+                  {latestCo2?.value != null ? formatScientificValue(latestCo2.value, 'ppm', 2) : 'Donnée indisponible'}
                 </span>
-                <span className="text-[10px] text-emerald-400 block font-mono">+{formatScientificValue(co2DeltaYear, 'ppm/an', 2)}</span>
+                {co2DeltaYear !== null ? (
+                  <span className="text-[10px] text-emerald-400 block font-mono">
+                    +{formatScientificValue(co2DeltaYear, 'ppm/an', 2)}
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-slate-500 block font-mono">
+                    Donnée indisponible
+                  </span>
+                )}
               </div>
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">CH₄ (Méthane global) :</span>
                 <span className="text-lg font-bold text-amber-300 font-mono">
-                  {formatScientificValue(latestCh4?.value, 'ppb', 1)}
+                  {latestCh4?.value != null ? formatScientificValue(latestCh4.value, 'ppb', 1) : 'Donnée indisponible'}
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">+174% / préind.</span>
+                <span className="text-[10px] text-slate-400 block font-mono">
+                  {latestCh4?.value != null
+                    ? `+${Math.round(((latestCh4.value - 722) / 722) * 100)}% / préind.`
+                    : 'Donnée indisponible'}
+                </span>
               </div>
             </div>
 
@@ -216,15 +251,23 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Anomalie globale annuelle :</span>
                 <span className="text-lg font-bold text-rose-400 font-mono">
-                  {formatAnomaly(latestTemp?.value)}
+                  {latestTemp?.value != null ? formatAnomaly(latestTemp.value) : 'Donnée indisponible'}
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">Ref. 1951-1980 ({latestTemp?.timestamp})</span>
+                <span className="text-[10px] text-slate-400 block font-mono">
+                  {latestTemp?.timestamp ? `Ref. 1951-1980 (${latestTemp.timestamp})` : 'Donnée indisponible'}
+                </span>
               </div>
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Comparaison préindustrielle :</span>
-                <span className="text-sm font-semibold text-rose-300 font-mono mt-1 block">
-                  ~+{latestTemp ? (latestTemp.value + 0.28).toFixed(2) : '1.45'} °C
-                </span>
+                {preindustrialAnomaly !== null ? (
+                  <span className="text-sm font-semibold text-rose-300 font-mono mt-1 block">
+                    ~+{preindustrialAnomaly.toFixed(2)} °C
+                  </span>
+                ) : (
+                  <span className="text-sm font-semibold text-slate-500 font-mono mt-1 block">
+                    Donnée indisponible
+                  </span>
+                )}
                 <span className="text-[10px] text-slate-400 block font-mono">Ref. 1850-1900</span>
               </div>
             </div>
@@ -259,9 +302,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Excédent thermique :</span>
                 <span className="text-lg font-bold text-blue-400 font-mono">
-                  +{formatScientificValue(latestOcean?.value, 'ZJ', 1)}
+                  {latestOcean?.value != null ? `+${formatScientificValue(latestOcean.value, 'ZJ', 1)}` : 'Donnée indisponible'}
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">Ref. 1981-2010 ({latestOcean?.timestamp})</span>
+                <span className="text-[10px] text-slate-400 block font-mono">
+                  {latestOcean?.timestamp ? `Ref. 1981-2010 (${latestOcean.timestamp})` : 'Donnée indisponible'}
+                </span>
               </div>
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Part énergétique :</span>
@@ -302,9 +347,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Déséquilibre Net (EEI) :</span>
                 <span className="text-lg font-bold text-emerald-400 font-mono">
-                  +{formatScientificValue(latestCeres?.value, 'W/m²', 2)}
+                  {latestCeres?.value != null ? `+${formatScientificValue(latestCeres.value, 'W/m²', 2)}` : 'Donnée indisponible'}
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">Année {latestCeres?.timestamp}</span>
+                <span className="text-[10px] text-slate-400 block font-mono">
+                  {latestCeres?.timestamp ? `Année ${latestCeres.timestamp}` : 'Donnée indisponible'}
+                </span>
               </div>
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Composantes TOA :</span>
@@ -345,9 +392,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Épaisseur optique actuelle :</span>
                 <span className="text-lg font-bold text-orange-400 font-mono">
-                  {formatScientificValue(latestVolcano?.value, 'SAOD', 3)}
+                  {latestVolcano?.value != null ? formatScientificValue(latestVolcano.value, 'SAOD', 3) : 'Donnée indisponible'}
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">Bruit de fond ({latestVolcano?.timestamp})</span>
+                <span className="text-[10px] text-slate-400 block font-mono">
+                  {latestVolcano?.timestamp ? `Bruit de fond (${latestVolcano.timestamp})` : 'Donnée indisponible'}
+                </span>
               </div>
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Événements repères :</span>
@@ -388,9 +437,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Flux solaire incident :</span>
                 <span className="text-lg font-bold text-cyan-300 font-mono">
-                  {formatScientificValue(latestPower?.value, 'kWh/m²/j', 2)}
+                  {latestPower?.value != null ? formatScientificValue(latestPower.value, 'kWh/m²/j', 2) : 'Donnée indisponible'}
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">{latestPower?.timestamp}</span>
+                <span className="text-[10px] text-slate-400 block font-mono">{latestPower?.timestamp ?? 'Donnée indisponible'}</span>
               </div>
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Station par défaut :</span>
@@ -431,9 +480,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Minimum Arctique (Sept.) :</span>
                 <span className="text-lg font-bold text-cyan-300 font-mono">
-                  {latestIce?.value} M km²
+                  {latestIce?.value != null ? `${latestIce.value} M km²` : 'Donnée indisponible'}
                 </span>
-                <span className="text-[10px] text-rose-400 block font-mono">-12,2% / décennie</span>
+                <span className="text-[10px] text-rose-400 block font-mono">
+                  {latestIce?.timestamp ? `Année ${latestIce.timestamp} · -12,2% / déc.` : 'Donnée indisponible'}
+                </span>
               </div>
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Rétroaction d'albédo :</span>
@@ -474,14 +525,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Arctique (90°N–64°N) :</span>
                 <span className="text-lg font-bold text-rose-400 font-mono">
-                  +{latestZonal?.value} °C
+                  {latestZonal?.value != null ? `+${latestZonal.value} °C` : 'Donnée indisponible'}
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">Ref. 1951-1980</span>
+                <span className="text-[10px] text-slate-400 block font-mono">
+                  {latestZonal?.timestamp ? `Ref. 1951-1980 (${latestZonal.timestamp})` : 'Donnée indisponible'}
+                </span>
               </div>
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Facteur d'amplification :</span>
                 <span className="text-sm font-semibold text-violet-300 font-mono mt-1 block">
-                  ~3,0× à 3,8×
+                  {latestZonal?.value != null && latestTemp?.value != null && latestTemp.value > 0
+                    ? `~${(latestZonal.value / latestTemp.value).toFixed(1)}×`
+                    : 'Donnée indisponible'}
                 </span>
                 <span className="text-[10px] text-slate-400 block font-mono">plus rapide que le globe</span>
               </div>
@@ -517,9 +572,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">AOD Troposphérique :</span>
                 <span className="text-lg font-bold text-sky-300 font-mono">
-                  {latestAerosols?.value}
+                  {latestAerosols?.value != null ? latestAerosols.value : 'Donnée indisponible'}
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">à 550 nm (Copernicus)</span>
+                <span className="text-[10px] text-slate-400 block font-mono">
+                  {latestAerosols?.timestamp ? `à 550 nm (${latestAerosols.timestamp})` : 'Donnée indisponible'}
+                </span>
               </div>
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Forçage net masquant :</span>

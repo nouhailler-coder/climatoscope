@@ -132,6 +132,71 @@ export function calculateLinearTrend(data: TimeSeriesPoint[]): LinearTrendResult
   };
 }
 
+export interface SeaIceTrendResult {
+  slopeAnnualMkm2: number;      // Pente annuelle OLS en Millions de km²/an
+  annualLossKm2: number;        // Perte annuelle en km²/an
+  decadalRatePercent: number;   // Tendance relative en %/décennie vs moyenne de référence
+  rSquared: number;             // Coefficient de détermination R²
+  startYear: number;
+  endYear: number;
+  totalPoints: number;
+  baselineMean: number;         // Moyenne de la période de référence utilisée (M km²)
+}
+
+/**
+ * Calculates documented Ordinary Least Squares (OLS) trend for sea ice time series.
+ * Follows NSIDC standardized methodology: decadal rate is expressed relative to
+ * the 1981-2010 reference climatology average (or user-defined baseline mean).
+ */
+export function calculateSeaIceTrend(
+  points: Array<{ year: number; value: number }>,
+  baselineMean?: number
+): SeaIceTrendResult | null {
+  const valid = points.filter(p => typeof p.value === 'number' && !isNaN(p.value) && p.value > 0);
+  const n = valid.length;
+  if (n < 3) return null;
+
+  let sumX = 0;
+  let sumY = 0;
+  let sumXY = 0;
+  let sumX2 = 0;
+  let sumY2 = 0;
+
+  for (let i = 0; i < n; i++) {
+    const x = valid[i].year;
+    const y = valid[i].value;
+    sumX += x;
+    sumY += y;
+    sumXY += x * y;
+    sumX2 += x * x;
+    sumY2 += y * y;
+  }
+
+  const denominator = n * sumX2 - sumX * sumX;
+  if (denominator === 0) return null;
+
+  const slope = (n * sumXY - sumX * sumY) / denominator;
+  const numR = n * sumXY - sumX * sumY;
+  const denR = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+  const r = denR === 0 ? 0 : numR / denR;
+  const rSquared = r * r;
+
+  const refMean = baselineMean && baselineMean > 0 ? baselineMean : sumY / n;
+  const decadalRatePercent = (slope * 10 / refMean) * 100;
+  const annualLossKm2 = slope * 1_000_000;
+
+  return {
+    slopeAnnualMkm2: Number(slope.toFixed(4)),
+    annualLossKm2: Math.round(annualLossKm2),
+    decadalRatePercent: Number(decadalRatePercent.toFixed(2)),
+    rSquared: Number(rSquared.toFixed(3)),
+    startYear: valid[0].year,
+    endYear: valid[valid.length - 1].year,
+    totalPoints: n,
+    baselineMean: Number(refMean.toFixed(2)),
+  };
+}
+
 /**
  * Calculates Pearson correlation coefficient between two time series matched by timestamp.
  */

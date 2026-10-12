@@ -118,11 +118,14 @@ class DatasetService {
         points = await this.seaIceProvider.fetchData({ forceRefresh });
         metadata = this.seaIceProvider.getMetadata();
       } else if (datasetId === 'seaice-antarctic-february-nsidc') {
-        points = this.seaIceProvider.getAntarcticData();
+        points = await this.seaIceProvider.fetchAntarcticData({ forceRefresh });
         metadata = this.seaIceProvider.getAntarcticMetadata();
       } else if (datasetId === 'seaice-arctic-march-nsidc') {
-        points = this.seaIceProvider.getArcticMarchData();
+        points = await this.seaIceProvider.fetchArcticMarchData({ forceRefresh });
         metadata = this.seaIceProvider.getArcticMarchMetadata();
+      } else if (datasetId === 'seaice-seasonal-cycle-nsidc') {
+        points = await this.seaIceProvider.fetchSeasonalCycleData({ forceRefresh });
+        metadata = this.seaIceProvider.getSeasonalCycleMetadata();
       } else if (datasetId === 'zonal-temp-arctic-era5') {
         points = await this.zonalProvider.fetchData({ forceRefresh });
         metadata = this.zonalProvider.getMetadata();
@@ -208,6 +211,7 @@ class DatasetService {
     if (id.startsWith('volcano')) return this.volcanoProvider.getMetadata();
     if (id === 'seaice-antarctic-february-nsidc') return this.seaIceProvider.getAntarcticMetadata();
     if (id === 'seaice-arctic-march-nsidc') return this.seaIceProvider.getArcticMarchMetadata();
+    if (id === 'seaice-seasonal-cycle-nsidc') return this.seaIceProvider.getSeasonalCycleMetadata();
     if (id.startsWith('seaice')) return this.seaIceProvider.getMetadata();
     if (id === 'zonal-temp-northmid-era5') return this.zonalProvider.getNorthMidMetadata();
     if (id === 'zonal-temp-tropics-era5') return this.zonalProvider.getTropicsMetadata();
@@ -238,6 +242,7 @@ class DatasetService {
       this.seaIceProvider.getMetadata(),
       this.seaIceProvider.getAntarcticMetadata(),
       this.seaIceProvider.getArcticMarchMetadata(),
+      this.seaIceProvider.getSeasonalCycleMetadata(),
       this.argoProvider.getMetadata(),
       this.argoProvider.get700mMetadata(),
       this.ceresProvider.getMetadata(),

@@ -18,7 +18,9 @@ import {
   getAntarcticFebData,
   getArcticMarchData,
   SEASONAL_CYCLE_MONTHS,
+  getSeasonalCycleMonths,
 } from '../src/data/baseline/seaice-nsidc';
+import { parseNsidcMonthlyCsv } from '../src/api/adapters/seaice';
 import {
   getArcticZonalData,
   getNorthMidZonalData,
@@ -184,8 +186,13 @@ describe('Baseline Datasets & Scientific Formatters', () => {
     expect(low2012!.value).toBe(3.39);
 
     const antFeb = getAntarcticFebData();
-    expect(antFeb.length).toBe(arcSept.length);
+    expect(antFeb.length).toBeGreaterThanOrEqual(arcSept.length);
     expect(antFeb[0].timestamp).toBe('1979');
+
+    // 2025 Antarctic minimum is included (~1.95 M km²)
+    const feb2025 = antFeb.find((p) => p.timestamp === '2025');
+    expect(feb2025).toBeDefined();
+    expect(feb2025!.value).toBeLessThan(2.0);
 
     // Recent Antarctic lows (< 2.0 M km² in 2022-2023)
     const low2023 = antFeb.find((p) => p.timestamp === '2023');
@@ -196,6 +203,22 @@ describe('Baseline Datasets & Scientific Formatters', () => {
     expect(SEASONAL_CYCLE_MONTHS.length).toBe(12);
     expect(SEASONAL_CYCLE_MONTHS[2].monthName).toBe('Mar'); // March max Arctic
     expect(SEASONAL_CYCLE_MONTHS[8].monthName).toBe('Sep'); // September min Arctic
+
+    const months = getSeasonalCycleMonths();
+    expect(months.length).toBe(12);
+
+    // Test parseNsidcMonthlyCsv
+    const sampleCsv = `year, mo, data-type, region, extent,   area
+1979, 09,      Goddard,      N,   7.05,   4.58
+1980, 09,      Goddard,      N,   7.67,   4.87
+2024, 09,      Goddard,      N,   4.28,   2.70
+2025, 09,          NRT,      N,   4.30,   2.72`;
+    const parsed = parseNsidcMonthlyCsv(sampleCsv);
+    expect(parsed.length).toBe(4);
+    expect(parsed[0].timestamp).toBe('1979');
+    expect(parsed[0].value).toBe(7.05);
+    expect(parsed[3].timestamp).toBe('2025');
+    expect(parsed[3].value).toBe(4.3);
   });
 
   it('loads Copernicus ERA5 & GISS Zonal Temperature Anomalies demonstrating Arctic Amplification', () => {
