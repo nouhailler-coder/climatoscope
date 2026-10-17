@@ -191,7 +191,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 </span>
                 <span className="text-[10px] text-slate-400 block font-mono">
                   {latestSpots?.timestamp
-                    ? `Cycle 25 (${latestSpots.timestamp}) · Amp. ~0,1%`
+                    ? `Cycle 25 (Obs. ${latestSpots.timestamp}) · Amp. ~0,1% TSI`
                     : 'Donnée indisponible'}
                 </span>
               </div>
@@ -347,7 +347,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 <span className="text-sm font-semibold text-blue-300 font-mono mt-1 block">
                   {oceanDeltaYear !== null ? `+${oceanDeltaYear} ZJ/an (${latestOcean?.timestamp})` : 'Donnée indisponible'}
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">~91% du déséquilibre global (GIEC AR6)</span>
+                <span className="text-[10px] text-slate-400 block font-mono">~91% du déséquilibre global absorbé (GIEC AR6 Ch.7)</span>
               </div>
             </div>
 
@@ -395,7 +395,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                     : 'Donnée indisponible'}
                 </span>
                 <span className="text-[10px] text-slate-400 block font-mono">
-                  {latestOlr?.timestamp ? `NASA CERES EBAF (${latestOlr.timestamp})` : 'Donnée indisponible'}
+                  {latestOlr?.timestamp ? `NASA CERES EBAF Ed4.2 (Obs. ${latestOlr.timestamp})` : 'Donnée indisponible'}
                 </span>
               </div>
             </div>
@@ -529,11 +529,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 </span>
               </div>
               <div>
-                <span className="text-[11px] text-slate-400 font-mono block">Albédo glace vs océan :</span>
+                <span className="text-[11px] text-slate-400 font-mono block">Réf. physiques d'albédo :</span>
                 <span className="text-sm font-semibold text-slate-200 font-mono mt-1 block">
-                  α 0,70 vs 0,06 (GIEC / NSIDC)
+                  α 0,70 (glace) vs 0,06 (eau)
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">Absorption : 30% glace vs 94% eau</span>
+                <span className="text-[10px] text-slate-400 block font-mono">Constantes NSIDC / GIEC AR6 Ch.9</span>
               </div>
             </div>
 

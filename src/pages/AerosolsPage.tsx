@@ -37,6 +37,9 @@ import {
   Sun,
   ShieldCheck,
   AlertTriangle,
+  ExternalLink,
+  Calculator,
+  Calendar,
 } from 'lucide-react';
 
 type AerosolGraphView = 'total-aod' | 'speciation' | 'forcing-so2' | 'paradox';
@@ -319,6 +322,51 @@ export const AerosolsPage: React.FC = () => {
               </ComposedChart>
             </ResponsiveContainer>
           )}
+        </div>
+
+        {/* Provenance & Scientific Traceability Strip */}
+        <div className="mt-4 pt-3.5 border-t border-slate-800/80 space-y-2.5">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs text-slate-300">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-400">Source :</span>
+                <a
+                  href="https://atmosphere.copernicus.eu/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sky-400 hover:text-sky-300 inline-flex items-center gap-1 font-medium underline decoration-sky-500/40 hover:decoration-sky-400"
+                >
+                  <span>Copernicus Atmosphere CAMS (EAC4) & CEDS Global</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+
+              <span className="text-slate-600 hidden sm:inline">|</span>
+
+              <div className="flex items-center gap-1.5 text-slate-300 font-mono text-[11px]">
+                <Calendar className="w-3 h-3 text-slate-400" />
+                <span>Dernière obs. : <strong>2024 (CAMS) / 2023 (CEDS)</strong></span>
+              </div>
+
+              <span className="text-slate-600 hidden sm:inline">|</span>
+
+              <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[11px]">
+                <span>Date extraction : <strong>Octobre 2026</strong></span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-start lg:self-auto">
+              <StatusBadge status={aod.status} lastUpdated="Octobre 2026" />
+            </div>
+          </div>
+
+          <div className="bg-slate-950/60 rounded-lg p-2.5 border border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-2">
+            <Calculator className="w-3.5 h-3.5 text-sky-400 flex-shrink-0 mt-0.5" />
+            <div className="leading-relaxed">
+              <strong className="text-slate-300">Méthode de calcul (Série dérivée) : </strong>
+              Épaisseur optique spectrale totale à 550 nm (AOD) réanalysée par assimilation satellitaire CAMS EAC4. Forçage radiatif effectif (ERF) calculé d'après les formulations radiatives du GIEC AR6 Chapitre 7 (Tableau 7.8). Émissions SO₂ issues de l'inventaire historique CEDS v2024_07_08.
+            </div>
+          </div>
         </div>
       </div>
 

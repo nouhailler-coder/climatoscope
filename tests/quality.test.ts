@@ -47,4 +47,32 @@ describe('Data Quality Validator', () => {
     expect(report.min).toBe(10);
     expect(report.max).toBe(18);
   });
+
+  it('detects unphysical values outside physical scientific boundaries', () => {
+    const unphysicalCo2: TimeSeriesPoint[] = [
+      { timestamp: '2020-01', value: 412.5 },
+      { timestamp: '2020-02', value: 8500.0 }, // completely impossible CO2 value
+      { timestamp: '2020-03', value: 415.0 },
+    ];
+
+    const { report, issues } = validateTimeSeriesData(unphysicalCo2, 'co2-noaa-mauna-loa');
+    expect(report.sanityCheck?.isWithinBounds).toBe(false);
+    expect(report.sanityCheck?.outlierCount).toBe(1);
+    expect(issues.some((i) => i.type === 'unphysical_value')).toBe(true);
+    expect(report.qualityScore).not.toBe('high');
+  });
+
+  it('certifies physical authenticity for valid atmospheric observations', () => {
+    const validCo2: TimeSeriesPoint[] = [
+      { timestamp: '2023-01', value: 419.5 },
+      { timestamp: '2023-02', value: 420.3 },
+      { timestamp: '2023-03', value: 421.1 },
+    ];
+
+    const { report, issues } = validateTimeSeriesData(validCo2, 'co2-noaa-mauna-loa');
+    expect(report.sanityCheck?.isWithinBounds).toBe(true);
+    expect(report.sanityCheck?.outlierCount).toBe(0);
+    expect(issues.some((i) => i.type === 'unphysical_value')).toBe(false);
+    expect(report.sanityCheck?.isAuthenticBaseline).toBe(true);
+  });
 });

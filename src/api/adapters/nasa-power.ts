@@ -34,8 +34,9 @@ export class NasaPowerProvider extends BaseDataProvider {
   async fetchData(options?: FetchOptions): Promise<TimeSeriesPoint[]> {
     const lat = options?.latitude ?? this.currentLocation.latitude;
     const lon = options?.longitude ?? this.currentLocation.longitude;
-    const startYear = 2015;
-    const endYear = 2024;
+    const currentYear = new Date().getFullYear();
+    const endYear = currentYear;
+    const startYear = Math.max(2015, currentYear - 10);
 
     const url = `https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=ALLSKY_SFC_SW_DWN&community=RE&longitude=${lon}&latitude=${lat}&start=${startYear}&end=${endYear}&format=JSON`;
 

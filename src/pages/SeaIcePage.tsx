@@ -43,6 +43,9 @@ import {
   ShieldAlert,
   Sliders,
   RotateCcw,
+  ExternalLink,
+  Calculator,
+  Calendar,
 } from 'lucide-react';
 
 type IceViewMode = 'arctic-september' | 'antarctic-february' | 'seasonal-cycle' | 'both-poles';
@@ -465,6 +468,51 @@ export const SeaIcePage: React.FC = () => {
               </ComposedChart>
             </ResponsiveContainer>
           )}
+        </div>
+
+        {/* Provenance & Scientific Traceability Strip */}
+        <div className="mt-4 pt-3.5 border-t border-slate-800/80 space-y-2.5">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs text-slate-300">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-400">Source :</span>
+                <a
+                  href="https://nsidc.org/data/seaice_index"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1 font-medium underline decoration-cyan-500/40 hover:decoration-cyan-400"
+                >
+                  <span>NSIDC / NOAA Sea Ice Index (G02135 v3.0)</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+
+              <span className="text-slate-600 hidden sm:inline">|</span>
+
+              <div className="flex items-center gap-1.5 text-slate-300 font-mono text-[11px]">
+                <Calendar className="w-3 h-3 text-slate-400" />
+                <span>Dernière obs. : <strong>2024 (Arctique Sept.) / 2024 (Antarctique Fév.)</strong></span>
+              </div>
+
+              <span className="text-slate-600 hidden sm:inline">|</span>
+
+              <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[11px]">
+                <span>Date extraction : <strong>Octobre 2026</strong></span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-start lg:self-auto">
+              <StatusBadge status={combinedStatus} onRefresh={handleRefreshAll} />
+            </div>
+          </div>
+
+          <div className="bg-slate-950/60 rounded-lg p-2.5 border border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-2">
+            <Calculator className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0 mt-0.5" />
+            <div className="leading-relaxed">
+              <strong className="text-slate-300">Méthode d'observation : </strong>
+              Étendue de la banquise (Sea Ice Extent) définie par l'aire totale des cellules océaniques contenant au moins 15% de glace de mer (seuil satellite passif micro-ondes Nimbus-7 SMMR, DMSP SSM/I et SSMIS). Période de référence climatologique : 1981–2010.
+            </div>
+          </div>
         </div>
       </div>
 

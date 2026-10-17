@@ -1,11 +1,11 @@
 /**
  * ClimatOSCOPE — Dataset & Synchronization Service
- * Implements cache-first offline architecture, data normalization, provenance tracking, and quality control.
+ * Implements cache-first offline architecture with TTL expiration, data normalization, provenance tracking, and quality control.
  */
 
 import { ArgoProvider } from '../api/adapters/argo';
 import { CeresProvider } from '../api/adapters/ceres';
-import { GistempProvider } from '../api/adapters/gistemp';
+import { GistempProvider, NoaaGlobalTempProvider, BerkeleyEarthProvider } from '../api/adapters/gistemp';
 import { LisirdProvider } from '../api/adapters/lisird';
 import { NasaPowerProvider } from '../api/adapters/nasa-power';
 import { NoaaGhgProvider } from '../api/adapters/noaa-ghg';
@@ -41,12 +41,12 @@ const PROVENANCE_REGISTRY: Record<string, ProvenanceDefinition> = {
     provenanceType: 'derived',
     isDerived: true,
     sourceUrl: 'https://gml.noaa.gov/ccgg/trends_ch4/',
-    calculationMethod: 'Moyenne arithmétique annuelle globale calculée à partir des moyennes mensuelles de surface du réseau NOAA GML.'
+    calculationMethod: 'Moyenne arithmétique annuelle calculée à partir des concentrations mensuelles de surface du réseau mondial NOAA GML.'
   },
   'ghg-n2o-noaa': {
     provenanceType: 'live_feed',
     sourceUrl: 'https://gml.noaa.gov/hats/combined/N2O.html',
-    calculationMethod: 'Mesures in situ et flacons du réseau mondial NOAA HATS (chromatographie en phase gazeuse ECD).'
+    calculationMethod: 'Réseau d\'échantillonnage mondial NOAA Halocarbons and other Atmospheric Trace Species (HATS).'
   },
   'ghg-n2o-annual-noaa': {
     provenanceType: 'derived',
@@ -66,66 +66,64 @@ const PROVENANCE_REGISTRY: Record<string, ProvenanceDefinition> = {
     calculationMethod: 'Analyse GISS Surface Temperature (GISTEMP v4) combinant stations terrestres GHCN v4 et températures de surface de la mer ERSST v5 (maille 250 km).'
   },
   'temp-noaa-globaltemp': {
-    provenanceType: 'embedded_historical',
+    provenanceType: 'live_feed',
     sourceUrl: 'https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/time-series',
-    calculationMethod: 'Reconstruction matricielle spatiale NOAA NCEI NOAAGlobalTemp v5 combinant GHCNm v4 et ERSST v5 sur maillage 5°x5°.'
+    calculationMethod: 'Reconstruction matricielle spatiale indépendante NOAA NCEI NOAAGlobalTemp v5 combinant GHCNm v4 et ERSST v5 sur maillage 5°x5° (téléchargement direct API NCEI).'
   },
   'temp-berkeley-earth': {
-    provenanceType: 'embedded_historical',
+    provenanceType: 'live_feed',
     sourceUrl: 'https://berkeleyearth.org/data/',
-    calculationMethod: 'Méthode d\'analyse statistique Berkeley Earth utilisant un kriging spatial direct sur plus de 40 000 stations terrestres et HadSST4.'
+    calculationMethod: 'Méthode d\'analyse statistique indépendante Berkeley Earth utilisant un kriging spatial direct sur plus de 40 000 stations terrestres et HadSST4.'
   },
   'solar-tsi-lisird': {
     provenanceType: 'live_feed',
     sourceUrl: 'https://lasp.colorado.edu/lisird/data/historical_tsi/',
-    calculationMethod: 'Irradiance solaire totale (TSI) composite satellitaire (SORCE/TIM, TSIS-1/TIM et reconstructions composites LASP).'
+    calculationMethod: 'Composite d\'irradiance solaire totale (TSI) étalonné sur les radiomètres spatiaux absolus SORCE/TIM et TSIS-1 (LASP).'
   },
   'solar-sunspots-silso': {
     provenanceType: 'embedded_historical',
     sourceUrl: 'https://www.sidc.be/silso/datafiles',
-    calculationMethod: 'Nombre international de taches solaires normalisé (Observatoire Royal de Belgique, SILSO / SIDC).'
+    calculationMethod: 'Nombre International de Taches Solaires (SSN v2.0) compilé par le centre mondial WDC-SILSO de l\'Observatoire Royal de Belgique.'
   },
   'ocean-ohc-argo-2000m': {
     provenanceType: 'live_feed',
     sourceUrl: 'https://www.ncei.noaa.gov/access/global-ocean-heat-content/',
-    calculationMethod: 'Contenu thermique océanique (0-2000m) intégré depuis les profils de flotteurs autonomes Argo et bathythermographes corrigés (NOAA NCEI).'
+    calculationMethod: 'Intégration volumétrique de l\'enthalpie océanique (0-2000m) calculée à partir des profils in situ du réseau mondial de 4 000 flotteurs autonomes Argo.'
   },
   'ocean-ohc-argo-700m': {
     provenanceType: 'embedded_historical',
-    sourceUrl: 'https://www.ncei.noaa.gov/access/global-ocean-heat-content/',
-    calculationMethod: 'Contenu thermique océanique des couches supérieures (0-700m) NOAA NCEI / Argo.'
+    sourceUrl: 'https://www.nodc.noaa.gov/OC5/3M_HEAT_CONTENT/',
+    calculationMethod: 'Contenu thermique océanique historique de surface (0-700 m) reconstruit par NOAA NCEI (bathythermographes et Argo).'
   },
   'energy-ceres-net-toa': {
     provenanceType: 'live_feed',
-    sourceUrl: 'https://ceres.larc.nasa.gov/data/',
-    calculationMethod: 'Déséquilibre énergétique net au sommet de l\'atmosphère (EEI = ASR - OLR) mesuré par radiomètres spatiaux CERES EBAF.'
+    sourceUrl: 'https://ceres.larc.nasa.gov/',
+    calculationMethod: 'Déséquilibre énergétique net au sommet de l\'atmosphère (EEI = ASR - OLR) mesuré par radiomètres spatiaux CERES EBAF Ed4.2.'
   },
   'energy-ceres-olr-toa': {
     provenanceType: 'embedded_historical',
-    isDerived: true,
     sourceUrl: 'https://ceres.larc.nasa.gov/data/',
     calculationMethod: 'Composante infrarouge thermique sortante (Outgoing Longwave Radiation - OLR) mesurée au sommet de l\'atmosphère par NASA CERES.'
   },
   'energy-ceres-albedo-toa': {
     provenanceType: 'embedded_historical',
-    isDerived: true,
     sourceUrl: 'https://ceres.larc.nasa.gov/data/',
-    calculationMethod: 'Composante solaire réfléchie en ondes courtes et albédo TOA mesurés par les radiomètres CERES.'
+    calculationMethod: 'Flux solaire réfléchi (SW_out) mesuré par radiométrie satellitaire CERES au sommet de l\'atmosphère.'
   },
   'volcano-saod-giss': {
     provenanceType: 'live_feed',
     sourceUrl: 'https://data.giss.nasa.gov/modelforce/strataer/',
-    calculationMethod: 'Épaisseur optique des aérosols stratosphériques (SAOD à 550 nm) composite NASA GISS / satellites SAGE II, CALIOP, OMPS.'
+    calculationMethod: 'Épaisseur optique des aérosols stratosphériques (SAOD à 550 nm) issue de lidars, photomètres et satellites SAGE/CALIOP (NASA GISS).'
   },
   'seaice-arctic-september-nsidc': {
     provenanceType: 'live_feed',
     sourceUrl: 'https://nsidc.org/data/seaice_index',
-    calculationMethod: 'Indice d\'étendue de la banquise arctique (seuil 15% de concentration de glace) au minimum annuel de septembre mesuré par micro-ondes passives satellitaires.'
+    calculationMethod: 'Étendue minimale de la banquise arctique (septembre) par télédétection micro-ondes passive satellitaire (NSIDC Sea Ice Index v3).'
   },
   'seaice-antarctic-february-nsidc': {
     provenanceType: 'live_feed',
     sourceUrl: 'https://nsidc.org/data/seaice_index',
-    calculationMethod: 'Étendue de la banquise antarctique au minimum estival de février (NSIDC Sea Ice Index).'
+    calculationMethod: 'Étendue minimale de la banquise antarctique (février) mesurée par capteurs micro-ondes satellitaires passifs (NSIDC).'
   },
   'seaice-arctic-march-nsidc': {
     provenanceType: 'live_feed',
@@ -184,10 +182,37 @@ const PROVENANCE_REGISTRY: Record<string, ProvenanceDefinition> = {
   }
 };
 
+/**
+ * Cache TTL policy (Time-To-Live) per dataset in milliseconds
+ * Live series expire after 24 hours; slower annual/satellite series expire after 7 to 30 days.
+ */
+export const DATASET_TTL_MS: Record<string, number> = {
+  // Live atmospheric & temperature: 24h
+  'co2-noaa-mauna-loa': 24 * 60 * 60 * 1000,
+  'ghg-ch4-noaa': 24 * 60 * 60 * 1000,
+  'ghg-n2o-noaa': 24 * 60 * 60 * 1000,
+  'temp-nasa-gistemp': 24 * 60 * 60 * 1000,
+  'temp-noaa-globaltemp': 24 * 60 * 60 * 1000,
+  'temp-berkeley-earth': 24 * 60 * 60 * 1000,
+  'seaice-arctic-september-nsidc': 24 * 60 * 60 * 1000,
+  'seaice-antarctic-february-nsidc': 24 * 60 * 60 * 1000,
+  'seaice-arctic-march-nsidc': 24 * 60 * 60 * 1000,
+  'nasa-power-radiation': 24 * 60 * 60 * 1000,
+  // Slower / satellite / annual: 7 days
+  'solar-tsi-lisird': 7 * 24 * 60 * 60 * 1000,
+  'ocean-ohc-argo-2000m': 7 * 24 * 60 * 60 * 1000,
+  'energy-ceres-net-toa': 7 * 24 * 60 * 60 * 1000,
+  'volcano-saod-giss': 30 * 24 * 60 * 60 * 1000,
+  'zonal-temp-arctic-era5': 7 * 24 * 60 * 60 * 1000,
+  'aerosols-cams-total-aod': 7 * 24 * 60 * 60 * 1000,
+};
+
 class DatasetService {
   private noaaProvider = new NoaaGmlProvider();
   private noaaGhgProvider = new NoaaGhgProvider();
   private gistempProvider = new GistempProvider();
+  private noaaTempProvider = new NoaaGlobalTempProvider();
+  private berkeleyTempProvider = new BerkeleyEarthProvider();
   private lisirdProvider = new LisirdProvider();
   private nasaPowerProvider = new NasaPowerProvider();
   private argoProvider = new ArgoProvider();
@@ -213,29 +238,40 @@ class DatasetService {
     datasetId: string,
     forceRefresh: boolean = false
   ): Promise<{ dataset: InternalDataset; status: CacheStatus }> {
-    // 1. Check in-memory
-    if (!forceRefresh && this.memoryCache.has(datasetId)) {
-      const cached = this.memoryCache.get(datasetId)!;
-      return { dataset: cached, status: this.resolveStatus(cached) };
-    }
+    const ttl = DATASET_TTL_MS[datasetId] ?? (24 * 60 * 60 * 1000);
 
-    // 2. Check IndexedDB
-    if (!forceRefresh) {
+    // 1. Check in-memory and IndexedDB cache
+    let cached: InternalDataset | null = null;
+    if (this.memoryCache.has(datasetId)) {
+      cached = this.memoryCache.get(datasetId)!;
+    } else {
       try {
-        const cached = await dbService.getDataset(datasetId);
-        if (cached && cached.data && cached.data.length > 0) {
-          // Re-enrich with latest provenance definitions in case metadata evolved
-          const enrichedMeta = this.enrichMetadata(cached.metadata, datasetId, cached.data);
-          cached.metadata = enrichedMeta;
+        const fromDb = await dbService.getDataset(datasetId);
+        if (fromDb && fromDb.data && fromDb.data.length > 0) {
+          cached = fromDb;
+          cached.metadata = this.enrichMetadata(cached.metadata, datasetId, cached.data);
           this.memoryCache.set(datasetId, cached);
-          return { dataset: cached, status: this.resolveStatus(cached) };
         }
       } catch (err) {
         console.warn('Erreur lecture IndexedDB:', err);
       }
     }
 
-    // 3. Fetch from provider
+    // 2. Cache validity check with TTL
+    if (cached && !forceRefresh) {
+      if (cached.metadata.provenanceType === 'embedded_historical') {
+        return { dataset: cached, status: 'embedded_historical' };
+      }
+
+      const ageMs = Date.now() - new Date(cached.lastUpdated).getTime();
+      if (ageMs < ttl) {
+        // Cache is fresh within TTL
+        return { dataset: cached, status: 'recent_cache' };
+      }
+      // Cache has expired (ageMs >= ttl), attempt live refresh below!
+    }
+
+    // 3. Fetch from provider (either forceRefresh, cache expired, or no cache)
     let points: TimeSeriesPoint[] = [];
     let metadata = this.getMetadataById(datasetId);
     let status: CacheStatus = 'live';
@@ -274,15 +310,13 @@ class DatasetService {
       } else if (datasetId.startsWith('temp-nasa')) {
         points = await this.gistempProvider.fetchData({ forceRefresh });
       } else if (datasetId.startsWith('temp-noaa')) {
-        const alt = this.gistempProvider.getAlternativeDataset('noaa');
-        metadata = alt.metadata;
-        points = alt.data;
-        status = 'embedded_historical';
+        // Real independent NOAA GlobalTemp provider with live API fetch
+        points = await this.noaaTempProvider.fetchData({ forceRefresh });
+        metadata = this.noaaTempProvider.getMetadata();
       } else if (datasetId.startsWith('temp-berkeley')) {
-        const alt = this.gistempProvider.getAlternativeDataset('berkeley');
-        metadata = alt.metadata;
-        points = alt.data;
-        status = 'embedded_historical';
+        // Real independent Berkeley Earth provider with live download
+        points = await this.berkeleyTempProvider.fetchData({ forceRefresh });
+        metadata = this.berkeleyTempProvider.getMetadata();
       } else if (datasetId === 'solar-tsi-lisird') {
         points = await this.lisirdProvider.fetchData({ forceRefresh });
       } else if (datasetId === 'solar-sunspots-silso') {
@@ -356,161 +390,188 @@ class DatasetService {
         throw new Error(`Dataset non supporté: ${datasetId}`);
       }
     } catch (err) {
-      console.error(`Échec fetch ${datasetId}, tentative fallback cache:`, err);
-      const cachedFallback = await dbService.getDataset(datasetId);
-      if (cachedFallback) {
-        this.memoryCache.set(datasetId, cachedFallback);
-        return { dataset: cachedFallback, status: 'error' };
+      console.warn(`Échec fetch direct pour ${datasetId}, tentative utilisation cache:`, err);
+      // Graceful fallback to existing cache with stale_cache status
+      if (cached && cached.data && cached.data.length > 0) {
+        return { dataset: cached, status: 'stale_cache' };
       }
-      status = 'error';
+      throw err;
     }
 
-    const enrichedMeta = this.enrichMetadata(metadata, datasetId, points);
+    // Enrich metadata with latest observation date and calculation method
+    metadata = this.enrichMetadata(metadata, datasetId, points);
 
-    const internal: InternalDataset = {
-      metadata: enrichedMeta,
+    const internalDataset: InternalDataset = {
+      metadata,
       data: points,
       lastUpdated: new Date().toISOString(),
       localCacheVersion: 1,
     };
 
-    // Save to IndexedDB & memory
+    // Save to runtime and persistent offline storage
+    this.memoryCache.set(datasetId, internalDataset);
     try {
-      await dbService.saveDataset(internal);
+      await dbService.saveDataset(internalDataset);
     } catch (err) {
-      console.warn('Erreur enregistrement IndexedDB:', err);
+      console.warn(`Impossible d'enregistrer ${datasetId} dans IndexedDB:`, err);
     }
-    this.memoryCache.set(datasetId, internal);
 
-    return { dataset: internal, status };
+    return { dataset: internalDataset, status };
   }
 
-  private enrichMetadata(meta: DatasetMetadata, datasetId: string, points?: TimeSeriesPoint[]): DatasetMetadata {
-    const provDef = PROVENANCE_REGISTRY[datasetId] || PROVENANCE_REGISTRY[meta.id] || {
-      provenanceType: 'live_feed',
-    };
+  private enrichMetadata(
+    meta: DatasetMetadata,
+    datasetId: string,
+    points?: TimeSeriesPoint[]
+  ): DatasetMetadata {
+    const prov = PROVENANCE_REGISTRY[datasetId];
+    const enriched = { ...meta };
 
-    const enriched: DatasetMetadata = {
-      ...meta,
-      provenanceType: provDef.provenanceType,
-      isDerived: provDef.isDerived ?? meta.isDerived ?? false,
-      calculationMethod: provDef.calculationMethod ?? meta.calculationMethod,
-      sourceUrl: provDef.sourceUrl ?? meta.sourceUrl,
-    };
+    if (prov) {
+      enriched.provenanceType = prov.provenanceType;
+      if (prov.isDerived !== undefined) enriched.isDerived = prov.isDerived;
+      if (prov.calculationMethod) enriched.calculationMethod = prov.calculationMethod;
+      if (prov.sourceUrl) enriched.sourceUrl = prov.sourceUrl;
+    }
 
     if (points && points.length > 0) {
-      enriched.lastObservationDate = points[points.length - 1].timestamp;
-      enriched.startDate = points[0].timestamp;
-      enriched.endDate = points[points.length - 1].timestamp;
+      const lastPt = points[points.length - 1];
+      const firstPt = points[0];
+      enriched.lastObservationDate = lastPt.timestamp;
+      enriched.startDate = firstPt.timestamp;
+      enriched.endDate = lastPt.timestamp;
     }
 
     return enriched;
   }
 
-  setNasaPowerLocation(location: GeoLocation) {
-    this.nasaPowerProvider.setLocation(location);
+  getMetadataById(datasetId: string): DatasetMetadata {
+    let baseMeta: DatasetMetadata;
+
+    if (datasetId.startsWith('co2-noaa')) {
+      baseMeta = this.noaaProvider.getMetadata();
+    } else if (datasetId.startsWith('ghg-ch4')) {
+      baseMeta = this.noaaGhgProvider.getMetadata();
+    } else if (datasetId.startsWith('ghg-n2o')) {
+      baseMeta = this.noaaGhgProvider.getN2oMetadata();
+    } else if (datasetId === 'ghg-aggi-noaa') {
+      baseMeta = this.noaaGhgProvider.getAggiMetadata();
+    } else if (datasetId.startsWith('temp-nasa')) {
+      baseMeta = this.gistempProvider.getMetadata();
+    } else if (datasetId.startsWith('temp-noaa')) {
+      baseMeta = this.noaaTempProvider.getMetadata();
+    } else if (datasetId.startsWith('temp-berkeley')) {
+      baseMeta = this.berkeleyTempProvider.getMetadata();
+    } else if (datasetId === 'solar-tsi-lisird') {
+      baseMeta = this.lisirdProvider.getMetadata();
+    } else if (datasetId === 'solar-sunspots-silso') {
+      baseMeta = this.lisirdProvider.getSunspotsData().metadata;
+    } else if (datasetId === 'ocean-ohc-argo-2000m') {
+      baseMeta = this.argoProvider.getMetadata();
+    } else if (datasetId === 'ocean-ohc-argo-700m') {
+      baseMeta = this.argoProvider.get700mMetadata();
+    } else if (datasetId === 'energy-ceres-net-toa') {
+      baseMeta = this.ceresProvider.getMetadata();
+    } else if (datasetId === 'energy-ceres-olr-toa') {
+      baseMeta = this.ceresProvider.getOlrMetadata();
+    } else if (datasetId === 'energy-ceres-albedo-toa') {
+      baseMeta = this.ceresProvider.getAlbedoMetadata();
+    } else if (datasetId === 'volcano-saod-giss') {
+      baseMeta = this.volcanoProvider.getMetadata();
+    } else if (datasetId === 'seaice-arctic-september-nsidc') {
+      baseMeta = this.seaIceProvider.getMetadata();
+    } else if (datasetId === 'seaice-antarctic-february-nsidc') {
+      baseMeta = this.seaIceProvider.getAntarcticMetadata();
+    } else if (datasetId === 'seaice-arctic-march-nsidc') {
+      baseMeta = this.seaIceProvider.getArcticMarchMetadata();
+    } else if (datasetId === 'seaice-seasonal-cycle-nsidc') {
+      baseMeta = this.seaIceProvider.getSeasonalCycleMetadata();
+    } else if (datasetId === 'zonal-temp-arctic-era5') {
+      baseMeta = this.zonalProvider.getMetadata();
+    } else if (datasetId === 'zonal-temp-northmid-era5') {
+      baseMeta = this.zonalProvider.getNorthMidMetadata();
+    } else if (datasetId === 'zonal-temp-tropics-era5') {
+      baseMeta = this.zonalProvider.getTropicsMetadata();
+    } else if (datasetId === 'zonal-temp-southmid-era5') {
+      baseMeta = this.zonalProvider.getSouthMidMetadata();
+    } else if (datasetId === 'zonal-temp-antarctic-era5') {
+      baseMeta = this.zonalProvider.getAntarcticMetadata();
+    } else if (datasetId === 'aerosols-cams-total-aod') {
+      baseMeta = this.aerosolsProvider.getMetadata();
+    } else if (datasetId === 'aerosols-so2-emissions-ceds') {
+      baseMeta = this.aerosolsProvider.getSo2Metadata();
+    } else if (datasetId.startsWith('nasa-power')) {
+      baseMeta = this.nasaPowerProvider.getMetadata();
+    } else {
+      baseMeta = {
+        id: datasetId,
+        name: datasetId,
+        shortName: datasetId,
+        organization: 'Organisme non spécifié',
+        source: 'Catalogue open-data',
+        sourceUrl: '',
+        variable: 'Mesure physique',
+        variableSymbol: 'X',
+        unit: 'Unité standard',
+        unitSymbol: '',
+        frequency: 'annual',
+        startDate: '1880',
+        endDate: '2025',
+        retrievedAt: new Date().toISOString(),
+        description: 'Dataset scientifique du catalogue ClimatOSCOPE.',
+      };
+    }
+
+    return this.enrichMetadata(baseMeta, datasetId);
+  }
+
+  getAllCatalogMetadata(): DatasetMetadata[] {
+    const ids = [
+      'temp-nasa-gistemp',
+      'temp-noaa-globaltemp',
+      'temp-berkeley-earth',
+      'co2-noaa-mauna-loa',
+      'ghg-ch4-noaa',
+      'ghg-ch4-annual-noaa',
+      'ghg-n2o-noaa',
+      'ghg-n2o-annual-noaa',
+      'ghg-aggi-noaa',
+      'solar-tsi-lisird',
+      'solar-sunspots-silso',
+      'ocean-ohc-argo-2000m',
+      'ocean-ohc-argo-700m',
+      'energy-ceres-net-toa',
+      'energy-ceres-olr-toa',
+      'energy-ceres-albedo-toa',
+      'volcano-saod-giss',
+      'seaice-arctic-september-nsidc',
+      'seaice-antarctic-february-nsidc',
+      'seaice-arctic-march-nsidc',
+      'seaice-seasonal-cycle-nsidc',
+      'zonal-temp-arctic-era5',
+      'zonal-temp-northmid-era5',
+      'zonal-temp-tropics-era5',
+      'zonal-temp-southmid-era5',
+      'zonal-temp-antarctic-era5',
+      'aerosols-cams-total-aod',
+      'aerosols-so2-emissions-ceds',
+      'nasa-power-daily-solar'
+    ];
+
+    return ids.map((id) => this.getMetadataById(id));
+  }
+
+  setNasaPowerLocation(loc: GeoLocation) {
+    this.nasaPowerProvider.setLocation(loc);
   }
 
   getNasaPowerLocation(): GeoLocation {
     return this.nasaPowerProvider.getLocation();
   }
 
-  getAvailableLocations(): GeoLocation[] {
-    return PRESET_LOCATIONS;
-  }
-
-  private getMetadataById(id: string): DatasetMetadata {
-    let baseMeta: DatasetMetadata;
-    if (id.startsWith('co2')) baseMeta = this.noaaProvider.getMetadata();
-    else if (id === 'ghg-ch4-annual-noaa') {
-      baseMeta = {
-        ...this.noaaGhgProvider.getMetadata(),
-        id: 'ghg-ch4-annual-noaa',
-        name: 'Méthane Atmosphérique Global (CH₄ - Moyenne Annuelle)',
-        frequency: 'annual'
-      };
-    } else if (id.startsWith('ghg-ch4')) baseMeta = this.noaaGhgProvider.getMetadata();
-    else if (id === 'ghg-n2o-annual-noaa') {
-      baseMeta = {
-        ...this.noaaGhgProvider.getN2oMetadata(),
-        id: 'ghg-n2o-annual-noaa',
-        name: 'Protoxyde d\'Azote (N₂O - Moyenne Annuelle)',
-        frequency: 'annual'
-      };
-    } else if (id.startsWith('ghg-n2o')) baseMeta = this.noaaGhgProvider.getN2oMetadata();
-    else if (id.startsWith('ghg-aggi')) baseMeta = this.noaaGhgProvider.getAggiMetadata();
-    else if (id.startsWith('temp-noaa')) baseMeta = this.gistempProvider.getAlternativeDataset('noaa').metadata;
-    else if (id.startsWith('temp-berkeley')) baseMeta = this.gistempProvider.getAlternativeDataset('berkeley').metadata;
-    else if (id.startsWith('temp')) baseMeta = this.gistempProvider.getMetadata();
-    else if (id === 'solar-sunspots-silso') baseMeta = this.lisirdProvider.getSunspotsData().metadata;
-    else if (id.startsWith('solar')) baseMeta = this.lisirdProvider.getMetadata();
-    else if (id === 'ocean-ohc-argo-700m') baseMeta = this.argoProvider.get700mMetadata();
-    else if (id.startsWith('ocean')) baseMeta = this.argoProvider.getMetadata();
-    else if (id === 'energy-ceres-olr-toa') baseMeta = this.ceresProvider.getOlrMetadata();
-    else if (id === 'energy-ceres-albedo-toa') baseMeta = this.ceresProvider.getAlbedoMetadata();
-    else if (id.startsWith('energy-ceres')) baseMeta = this.ceresProvider.getMetadata();
-    else if (id.startsWith('volcano')) baseMeta = this.volcanoProvider.getMetadata();
-    else if (id === 'seaice-antarctic-february-nsidc') baseMeta = this.seaIceProvider.getAntarcticMetadata();
-    else if (id === 'seaice-arctic-march-nsidc') baseMeta = this.seaIceProvider.getArcticMarchMetadata();
-    else if (id === 'seaice-seasonal-cycle-nsidc') baseMeta = this.seaIceProvider.getSeasonalCycleMetadata();
-    else if (id.startsWith('seaice')) baseMeta = this.seaIceProvider.getMetadata();
-    else if (id === 'zonal-temp-northmid-era5') baseMeta = this.zonalProvider.getNorthMidMetadata();
-    else if (id === 'zonal-temp-tropics-era5') baseMeta = this.zonalProvider.getTropicsMetadata();
-    else if (id === 'zonal-temp-southmid-era5') baseMeta = this.zonalProvider.getSouthMidMetadata();
-    else if (id === 'zonal-temp-antarctic-era5') baseMeta = this.zonalProvider.getAntarcticMetadata();
-    else if (id.startsWith('zonal')) baseMeta = this.zonalProvider.getMetadata();
-    else if (id === 'aerosols-so2-emissions-ceds') baseMeta = this.aerosolsProvider.getSo2Metadata();
-    else if (id.startsWith('aerosols')) baseMeta = this.aerosolsProvider.getMetadata();
-    else baseMeta = this.nasaPowerProvider.getMetadata();
-
-    return this.enrichMetadata(baseMeta, id);
-  }
-
-  async getAllCatalogMetadata(): Promise<DatasetMetadata[]> {
-    const list = [
-      this.getMetadataById('solar-tsi-lisird'),
-      this.getMetadataById('solar-sunspots-silso'),
-      this.getMetadataById('co2-noaa-mauna-loa'),
-      this.getMetadataById('ghg-ch4-noaa'),
-      this.getMetadataById('ghg-ch4-annual-noaa'),
-      this.getMetadataById('ghg-n2o-noaa'),
-      this.getMetadataById('ghg-n2o-annual-noaa'),
-      this.getMetadataById('ghg-aggi-noaa'),
-      this.getMetadataById('temp-nasa-gistemp'),
-      this.getMetadataById('temp-noaa-globaltemp'),
-      this.getMetadataById('temp-berkeley-earth'),
-      this.getMetadataById('zonal-temp-arctic-era5'),
-      this.getMetadataById('zonal-temp-northmid-era5'),
-      this.getMetadataById('zonal-temp-tropics-era5'),
-      this.getMetadataById('zonal-temp-southmid-era5'),
-      this.getMetadataById('zonal-temp-antarctic-era5'),
-      this.getMetadataById('seaice-arctic-september-nsidc'),
-      this.getMetadataById('seaice-antarctic-february-nsidc'),
-      this.getMetadataById('seaice-arctic-march-nsidc'),
-      this.getMetadataById('seaice-seasonal-cycle-nsidc'),
-      this.getMetadataById('ocean-ohc-argo-2000m'),
-      this.getMetadataById('ocean-ohc-argo-700m'),
-      this.getMetadataById('energy-ceres-net-toa'),
-      this.getMetadataById('energy-ceres-olr-toa'),
-      this.getMetadataById('energy-ceres-albedo-toa'),
-      this.getMetadataById('volcano-saod-giss'),
-      this.getMetadataById('aerosols-cams-total-aod'),
-      this.getMetadataById('aerosols-so2-emissions-ceds'),
-      this.getMetadataById('nasa-power-daily-solar'),
-    ];
-
-    // For each dataset, if present in cache, extract last observation date
-    return await Promise.all(
-      list.map(async (meta) => {
-        try {
-          const cached = await dbService.getDataset(meta.id);
-          if (cached && cached.data && cached.data.length > 0) {
-            return this.enrichMetadata(meta, meta.id, cached.data);
-          }
-        } catch {}
-        return meta;
-      })
-    );
+  async clearAllCaches(): Promise<void> {
+    this.memoryCache.clear();
+    await dbService.clearCache();
   }
 }
 

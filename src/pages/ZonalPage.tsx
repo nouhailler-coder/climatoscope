@@ -32,6 +32,10 @@ import {
   ShieldAlert,
   ArrowUpRight,
   Flame,
+  ExternalLink,
+  Calculator,
+  Calendar,
+  Radio,
 } from 'lucide-react';
 
 export const ZonalPage: React.FC = () => {
@@ -283,6 +287,51 @@ export const ZonalPage: React.FC = () => {
               )}
             </ComposedChart>
           </ResponsiveContainer>
+        </div>
+
+        {/* Provenance & Scientific Traceability Strip */}
+        <div className="mt-4 pt-3.5 border-t border-slate-800/80 space-y-2.5">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs text-slate-300">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-400">Source :</span>
+                <a
+                  href="https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels-monthly-means"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-violet-400 hover:text-violet-300 inline-flex items-center gap-1 font-medium underline decoration-violet-500/40 hover:decoration-violet-400"
+                >
+                  <span>Copernicus ERA5 / ECMWF</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+
+              <span className="text-slate-600 hidden sm:inline">|</span>
+
+              <div className="flex items-center gap-1.5 text-slate-300 font-mono text-[11px]">
+                <Calendar className="w-3 h-3 text-slate-400" />
+                <span>Dernière obs. : <strong>2024</strong></span>
+              </div>
+
+              <span className="text-slate-600 hidden sm:inline">|</span>
+
+              <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[11px]">
+                <span>Date extraction : <strong>Octobre 2026</strong></span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-start lg:self-auto">
+              <StatusBadge status={arctic.status} lastUpdated="Octobre 2026" />
+            </div>
+          </div>
+
+          <div className="bg-slate-950/60 rounded-lg p-2.5 border border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-2">
+            <Calculator className="w-3.5 h-3.5 text-violet-400 flex-shrink-0 mt-0.5" />
+            <div className="leading-relaxed">
+              <strong className="text-slate-300">Méthode de calcul (Série dérivée) : </strong>
+              Moyennes zonales annuelles calculées par intégration spatiale avec pondération cosinus de la latitude sur grille 0,25° × 0,25°. L'anomalie est normalisée par rapport à la climatologie de référence 1951–1980.
+            </div>
+          </div>
         </div>
       </div>
 

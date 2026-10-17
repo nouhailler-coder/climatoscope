@@ -74,6 +74,15 @@ export interface LinearTrendResult {
   annualRate: number; // normalized per decade or per year
 }
 
+export interface PhysicalSanityCheck {
+  variableName: string;
+  expectedRange: [number, number];
+  isWithinBounds: boolean;
+  outlierCount: number;
+  isAuthenticBaseline: boolean;
+  notes: string;
+}
+
 export interface DataQualityReport {
   datasetId: string;
   totalPoints: number;
@@ -85,4 +94,5 @@ export interface DataQualityReport {
   mean: number;
   isMonotonicDate: boolean;
   qualityScore: 'high' | 'medium' | 'low';
+  sanityCheck?: PhysicalSanityCheck;
 }

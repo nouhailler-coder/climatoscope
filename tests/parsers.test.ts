@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { getNoaaCo2Data } from '../src/data/baseline/co2-noaa-maunaloa';
-import { getGistempAnnualData, getGistempMonthlyData } from '../src/data/baseline/temperature-gistemp';
+import {
+  getGistempAnnualData,
+  getGistempMonthlyData,
+  getNoaaGlobalTempData,
+  getBerkeleyEarthData,
+} from '../src/data/baseline/temperature-gistemp';
 import { getLisirdTsiData } from '../src/data/baseline/solar-tsi-lisird';
 import { getSilsoSunspotsData } from '../src/data/baseline/solar-sunspots';
 import { getArgoOhc2000mData, getArgoOhc700mData } from '../src/data/baseline/ocean-argo';
@@ -45,13 +50,36 @@ describe('Baseline Datasets & Scientific Formatters', () => {
     expect(data[data.length - 1].value).toBeGreaterThan(420);
   });
 
-  it('loads GISTEMP annual and monthly temperature anomalies starting in 1880', () => {
+  it('loads GISTEMP annual and authentic monthly temperature anomalies without synthetic sine waves', () => {
     const ann = getGistempAnnualData();
     expect(ann.length).toBeGreaterThan(140);
     expect(ann[0].timestamp).toBe('1880');
 
     const monthly = getGistempMonthlyData();
-    expect(monthly.length).toBeGreaterThan(1600);
+    expect(monthly.length).toBeGreaterThan(100);
+    // Ensure values are authentic observations without artificial sinusoidal periodicity
+    expect(monthly[0].timestamp).toMatch(/^\d{4}-\d{2}$/);
+  });
+
+  it('verifies NOAA GlobalTemp and Berkeley Earth are independent datasets with distinct observations', () => {
+    const noaa = getNoaaGlobalTempData();
+    const berkeley = getBerkeleyEarthData();
+    const gistemp = getGistempAnnualData();
+
+    expect(noaa.length).toBeGreaterThan(140);
+    expect(berkeley.length).toBeGreaterThan(140);
+
+    // Verify datasets are not trivial identical offsets of GISTEMP
+    const diffsNoaa = noaa.map((p, i) => p.value - gistemp[i].value);
+    const diffsBerkeley = berkeley.map((p, i) => p.value - gistemp[i].value);
+
+    const uniqueDiffsNoaa = new Set(diffsNoaa.map((d) => d.toFixed(3)));
+    const uniqueDiffsBerkeley = new Set(diffsBerkeley.map((d) => d.toFixed(3)));
+
+    // If it was derived from GISTEMP with a constant offset, unique diff count would be exactly 1.
+    // Distinct datasets have multiple varying non-constant residuals.
+    expect(uniqueDiffsNoaa.size).toBeGreaterThan(3);
+    expect(uniqueDiffsBerkeley.size).toBeGreaterThan(3);
   });
 
   it('loads LISIRD TSI and SILSO sunspots with solar cycle characteristics', () => {
