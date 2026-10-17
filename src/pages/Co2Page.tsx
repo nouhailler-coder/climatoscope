@@ -108,6 +108,30 @@ export const Co2Page: React.FC = () => {
   // Methane mitigation simulator state
   const [ch4CutPercent, setCh4CutPercent] = useState<number>(30); // 30% reduction scenario (Global Methane Pledge)
 
+  // Dynamically extracted latest points and pre-industrial ratios from loaded datasets
+  const latestCo2Point = co2.dataset?.data && co2.dataset.data.length > 0
+    ? co2.dataset.data[co2.dataset.data.length - 1]
+    : undefined;
+  const latestCh4Point = ch4.dataset?.data && ch4.dataset.data.length > 0
+    ? ch4.dataset.data[ch4.dataset.data.length - 1]
+    : undefined;
+  const latestN2oPoint = n2o.dataset?.data && n2o.dataset.data.length > 0
+    ? n2o.dataset.data[n2o.dataset.data.length - 1]
+    : undefined;
+  const latestAggiPoint = aggi.dataset?.data && aggi.dataset.data.length > 0
+    ? aggi.dataset.data[aggi.dataset.data.length - 1]
+    : undefined;
+
+  const ch4IncreasePercent = latestCh4Point?.value != null
+    ? Math.round(((latestCh4Point.value - 722) / 722) * 100)
+    : null;
+  const n2oIncreasePercent = latestN2oPoint?.value != null
+    ? Math.round(((latestN2oPoint.value - 270) / 270) * 100)
+    : null;
+  const aggiPercentOver1990 = latestAggiPoint?.value != null
+    ? Math.round((latestAggiPoint.value - 1) * 100)
+    : null;
+
   // Determine current active dataset based on tab
   const currentActiveDataset = useMemo(() => {
     if (activeTab === 'co2') return co2;
@@ -206,7 +230,7 @@ export const Co2Page: React.FC = () => {
           <Flame className="w-4 h-4 text-emerald-400" />
           <span>CO₂ (Mauna Loa)</span>
           <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">
-            ~427 ppm
+            {latestCo2Point?.value != null ? `${latestCo2Point.value.toFixed(1)} ppm` : 'CO₂'}
           </span>
         </button>
 
@@ -221,7 +245,7 @@ export const Co2Page: React.FC = () => {
           <Zap className="w-4 h-4 text-amber-400" />
           <span>CH₄ (Méthane Global)</span>
           <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">
-            ~1 978 ppb
+            {latestCh4Point?.value != null ? `${Math.round(latestCh4Point.value)} ppb` : 'CH₄'}
           </span>
         </button>
 
@@ -236,7 +260,7 @@ export const Co2Page: React.FC = () => {
           <Wheat className="w-4 h-4 text-indigo-400" />
           <span>N₂O (Protoxyde d’azote)</span>
           <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">
-            ~340 ppb
+            {latestN2oPoint?.value != null ? `${latestN2oPoint.value.toFixed(1)} ppb` : 'N₂O'}
           </span>
         </button>
 
@@ -251,7 +275,7 @@ export const Co2Page: React.FC = () => {
           <Gauge className="w-4 h-4 text-rose-400" />
           <span>Indice AGGI (Forçage Total)</span>
           <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">
-            +63% / 1990
+            {aggiPercentOver1990 !== null ? `+${aggiPercentOver1990}% / 1990` : 'AGGI'}
           </span>
         </button>
 
@@ -321,6 +345,7 @@ export const Co2Page: React.FC = () => {
             <TimeSeriesChart
               data={co2.dataset.data}
               metadata={co2.dataset.metadata}
+              status={co2.status}
               color="#10b981"
               showMovingAverageDefault={true}
             />
@@ -353,7 +378,15 @@ export const Co2Page: React.FC = () => {
                 Le Méthane Atmosphérique (CH₄) — Le deuxième contributeur et levier d'action rapide
               </strong>
               <p>
-                Le méthane est un gaz à effet de serre puissant dont la concentration mondiale a plus que <strong>doublé (+174%)</strong> depuis l'ère préindustrielle (passant de ~722 ppb à plus de 1 978 ppb aujourd'hui).
+                Le méthane est un gaz à effet de serre puissant dont la concentration mondiale a plus que{' '}
+                <strong>
+                  doublé ({ch4IncreasePercent !== null ? `+${ch4IncreasePercent}%` : 'donnée indisponible'})
+                </strong>{' '}
+                depuis l'ère préindustrielle (passant de 722 ppb en 1750 à{' '}
+                {latestCh4Point?.value != null
+                  ? `${formatScientificValue(latestCh4Point.value, 'ppb', 1)}`
+                  : 'donnée indisponible'}
+                {latestCh4Point?.timestamp ? ` en ${latestCh4Point.timestamp}` : ''}).
               </p>
               <ul className="list-disc list-inside space-y-1 text-slate-400 font-mono">
                 <li>
@@ -370,18 +403,26 @@ export const Co2Page: React.FC = () => {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
             <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
               <span className="text-slate-400 block text-[10px]">Concentration actuelle :</span>
-              <span className="text-amber-400 font-bold text-base mt-0.5 block">~1 978 ppb</span>
-              <span className="text-[10px] text-slate-400 block">NOAA Global MBL (2025)</span>
+              <span className="text-amber-400 font-bold text-base mt-0.5 block">
+                {latestCh4Point?.value != null ? formatScientificValue(latestCh4Point.value, 'ppb', 1) : 'Donnée indisponible'}
+              </span>
+              <span className="text-[10px] text-slate-400 block">
+                {latestCh4Point?.timestamp ? `NOAA Global MBL (${latestCh4Point.timestamp})` : 'NOAA Global MBL'}
+              </span>
             </div>
             <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
               <span className="text-slate-400 block text-[10px]">Niveau préindustriel :</span>
               <span className="text-slate-200 font-bold text-base mt-0.5 block">722 ppb</span>
-              <span className="text-[10px] text-slate-400 block">Glace Law Dome</span>
+              <span className="text-[10px] text-slate-400 block">GIEC AR6 (Law Dome, 1750)</span>
             </div>
             <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
               <span className="text-slate-400 block text-[10px]">Augmentation relative :</span>
-              <span className="text-amber-300 font-bold text-base mt-0.5 block">+174 %</span>
-              <span className="text-[10px] text-slate-400 block">Plus que doublé !</span>
+              <span className="text-amber-300 font-bold text-base mt-0.5 block">
+                {ch4IncreasePercent !== null ? `+${ch4IncreasePercent} %` : 'Donnée indisponible'}
+              </span>
+              <span className="text-[10px] text-slate-400 block">
+                {latestCh4Point?.timestamp ? `Mesure observée (${latestCh4Point.timestamp})` : 'Calculé vs 1750'}
+              </span>
             </div>
             <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
               <span className="text-slate-400 block text-[10px]">Durée de vie dans l'air :</span>
@@ -395,6 +436,7 @@ export const Co2Page: React.FC = () => {
             <TimeSeriesChart
               data={ch4.dataset.data}
               metadata={ch4.dataset.metadata}
+              status={ch4.status}
               color="#f59e0b"
               showMovingAverageDefault={true}
             />
@@ -444,18 +486,26 @@ export const Co2Page: React.FC = () => {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
             <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
               <span className="text-slate-400 block text-[10px]">Concentration actuelle :</span>
-              <span className="text-indigo-400 font-bold text-base mt-0.5 block">~340 ppb</span>
-              <span className="text-[10px] text-slate-400 block">NOAA Global MBL (2025)</span>
+              <span className="text-indigo-400 font-bold text-base mt-0.5 block">
+                {latestN2oPoint?.value != null ? formatScientificValue(latestN2oPoint.value, 'ppb', 1) : 'Donnée indisponible'}
+              </span>
+              <span className="text-[10px] text-slate-400 block">
+                {latestN2oPoint?.timestamp ? `NOAA Global MBL (${latestN2oPoint.timestamp})` : 'NOAA Global MBL'}
+              </span>
             </div>
             <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
               <span className="text-slate-400 block text-[10px]">Niveau préindustriel :</span>
               <span className="text-slate-200 font-bold text-base mt-0.5 block">270 ppb</span>
-              <span className="text-[10px] text-slate-400 block">Carotte de glace EPICA</span>
+              <span className="text-[10px] text-slate-400 block">GIEC AR6 (EPICA, 1750)</span>
             </div>
             <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
               <span className="text-slate-400 block text-[10px]">Croissance séculaire :</span>
-              <span className="text-indigo-300 font-bold text-base mt-0.5 block">+26 %</span>
-              <span className="text-[10px] text-slate-400 block">Hausse de +1,2 ppb / an</span>
+              <span className="text-indigo-300 font-bold text-base mt-0.5 block">
+                {n2oIncreasePercent !== null ? `+${n2oIncreasePercent} %` : 'Donnée indisponible'}
+              </span>
+              <span className="text-[10px] text-slate-400 block">
+                {latestN2oPoint?.timestamp ? `Mesure observée (${latestN2oPoint.timestamp})` : 'Calculé vs 1750'}
+              </span>
             </div>
             <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
               <span className="text-slate-400 block text-[10px]">Pouvoir réchauffant (PRG) :</span>
@@ -469,6 +519,7 @@ export const Co2Page: React.FC = () => {
             <TimeSeriesChart
               data={n2o.dataset.data}
               metadata={n2o.dataset.metadata}
+              status={n2o.status}
               color="#6366f1"
               showMovingAverageDefault={false}
             />
@@ -516,6 +567,7 @@ export const Co2Page: React.FC = () => {
             <TimeSeriesChart
               data={aggi.dataset.data}
               metadata={aggi.dataset.metadata}
+              status={aggi.status}
               color="#f43f5e"
               showMovingAverageDefault={false}
               baselineZero={false}

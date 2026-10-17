@@ -57,6 +57,7 @@ export const SolarPage: React.FC = () => {
           <TimeSeriesChart
             data={tsi.dataset.data}
             metadata={tsi.dataset.metadata}
+            status={tsi.status}
             color="#f59e0b"
             showMovingAverageDefault={false}
           />
@@ -76,6 +77,7 @@ export const SolarPage: React.FC = () => {
           <TimeSeriesChart
             data={spots.dataset.data}
             metadata={spots.dataset.metadata}
+            status={spots.status}
             color="#38bdf8"
             showMovingAverageDefault={true}
           />

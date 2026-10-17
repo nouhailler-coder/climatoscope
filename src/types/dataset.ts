@@ -10,6 +10,8 @@ export interface TimeSeriesPoint {
   qualityFlag?: 'valid' | 'interpolated' | 'preliminary' | 'suspect';
 }
 
+export type DatasetProvenanceType = 'live_feed' | 'embedded_historical' | 'derived';
+
 export interface DatasetMetadata {
   id: string;
   name: string;
@@ -30,6 +32,10 @@ export interface DatasetMetadata {
   license?: string;
   description: string;
   isProxyOrReconstruction?: boolean;
+  provenanceType?: DatasetProvenanceType;
+  isDerived?: boolean;
+  calculationMethod?: string;
+  lastObservationDate?: string;
 }
 
 export interface InternalDataset {

@@ -18,7 +18,15 @@ export interface DataProvider {
   fetchData(options?: FetchOptions): Promise<TimeSeriesPoint[]>;
 }
 
-export type CacheStatus = 'fresh' | 'cached' | 'error' | 'syncing';
+export type CacheStatus =
+  | 'live'                // En direct (récupéré depuis le réseau lors de la session)
+  | 'recent_cache'        // Cache récent (< 24h)
+  | 'stale_cache'         // Cache ancien (> 24h)
+  | 'embedded_historical' // Historique embarqué (référence historique intégrée)
+  | 'error'               // Source inaccessible
+  | 'syncing'             // Synchronisation...
+  | 'fresh'               // Alias compatibilité
+  | 'cached';             // Alias compatibilité
 
 export interface GeoLocation {
   id: string;

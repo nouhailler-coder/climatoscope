@@ -108,6 +108,7 @@ export const ArgoPage: React.FC = () => {
         <TimeSeriesChart
           data={ocean.dataset.data}
           metadata={ocean.dataset.metadata}
+          status={ocean.status}
           color="#3b82f6"
           showMovingAverageDefault={false}
           baselineZero={true}

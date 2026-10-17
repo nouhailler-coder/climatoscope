@@ -195,6 +195,7 @@ export const NasaPowerPage: React.FC = () => {
         <TimeSeriesChart
           data={power.dataset.data}
           metadata={power.dataset.metadata}
+          status={power.status}
           color="#06b6d4"
           showMovingAverageDefault={true}
         />

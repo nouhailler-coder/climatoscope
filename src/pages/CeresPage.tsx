@@ -17,6 +17,9 @@ export const CeresPage: React.FC = () => {
       : 'energy-ceres-albedo-toa';
 
   const ceres = useDataset(datasetId);
+  const ceresOlr = useDataset('energy-ceres-olr-toa');
+  const ceresAlbedo = useDataset('energy-ceres-albedo-toa');
+  const ceresNet = useDataset('energy-ceres-net-toa');
 
   const handleExport = (format: 'csv' | 'json') => {
     if (!ceres.dataset) return;
@@ -27,7 +30,9 @@ export const CeresPage: React.FC = () => {
     }
   };
 
-  const latestVal = ceres.dataset?.data[ceres.dataset.data.length - 1];
+  const latestNet = ceresNet.dataset?.data[ceresNet.dataset.data.length - 1];
+  const latestOlr = ceresOlr.dataset?.data[ceresOlr.dataset.data.length - 1];
+  const latestAlbedo = ceresAlbedo.dataset?.data[ceresAlbedo.dataset.data.length - 1];
 
   return (
     <div className="space-y-8">
@@ -88,8 +93,8 @@ export const CeresPage: React.FC = () => {
               <span className="font-semibold">Solaire Entrant (SW_in)</span>
               <ArrowDown className="w-4 h-4" />
             </div>
-            <div className="text-xl font-bold text-white font-mono mt-1">~340,4 W/m²</div>
-            <div className="text-[10px] text-slate-400 mt-0.5">TSI / 4 (Flux géométrique moyen)</div>
+            <div className="text-xl font-bold text-white font-mono mt-1">340,4 W/m²</div>
+            <div className="text-[10px] text-slate-400 mt-0.5">TSI / 4 (Flux géométrique sphérique)</div>
           </div>
 
           <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
@@ -97,8 +102,12 @@ export const CeresPage: React.FC = () => {
               <span className="font-semibold">Solaire Réfléchi (SW_out)</span>
               <ArrowUp className="w-4 h-4" />
             </div>
-            <div className="text-xl font-bold text-cyan-300 font-mono mt-1">~98,5 W/m²</div>
-            <div className="text-[10px] text-slate-400 mt-0.5">Albédo planétaire (~29%)</div>
+            <div className="text-xl font-bold text-cyan-300 font-mono mt-1">
+              {latestAlbedo?.value != null ? `${latestAlbedo.value.toFixed(1)} W/m²` : 'Donnée indisponible'}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">
+              {latestAlbedo?.timestamp ? `Albédo planétaire (${latestAlbedo.timestamp})` : 'Albédo planétaire'}
+            </div>
           </div>
 
           <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
@@ -106,8 +115,12 @@ export const CeresPage: React.FC = () => {
               <span className="font-semibold">Infrarouge Sortant (OLR)</span>
               <ArrowUp className="w-4 h-4" />
             </div>
-            <div className="text-xl font-bold text-rose-300 font-mono mt-1">~240,8 W/m²</div>
-            <div className="text-[10px] text-slate-400 mt-0.5">Émission thermique globale</div>
+            <div className="text-xl font-bold text-rose-300 font-mono mt-1">
+              {latestOlr?.value != null ? `${latestOlr.value.toFixed(1)} W/m²` : 'Donnée indisponible'}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">
+              {latestOlr?.timestamp ? `Émission thermique (${latestOlr.timestamp})` : 'Émission thermique'}
+            </div>
           </div>
 
           <div className="bg-slate-950/70 p-3.5 rounded-xl border border-emerald-500/40">
@@ -116,9 +129,11 @@ export const CeresPage: React.FC = () => {
               <span className="text-[11px] font-bold">Δ = IN - OUT</span>
             </div>
             <div className="text-xl font-bold text-emerald-300 font-mono mt-1">
-              +{latestVal ? latestVal.value.toFixed(2) : '1.42'} W/m²
+              {latestNet?.value != null ? `+${latestNet.value.toFixed(2)} W/m²` : 'Donnée indisponible'}
             </div>
-            <div className="text-[10px] text-emerald-400/90 mt-0.5">Chaleur piégée en continu</div>
+            <div className="text-[10px] text-emerald-400/90 mt-0.5">
+              {latestNet?.timestamp ? `NASA CERES EBAF (${latestNet.timestamp})` : 'Chaleur piégée en continu'}
+            </div>
           </div>
         </div>
       </div>
@@ -166,6 +181,7 @@ export const CeresPage: React.FC = () => {
         <TimeSeriesChart
           data={ceres.dataset.data}
           metadata={ceres.dataset.metadata}
+          status={ceres.status}
           color={selectedFlux === 'net' ? '#10b981' : selectedFlux === 'olr' ? '#f43f5e' : '#38bdf8'}
           showMovingAverageDefault={false}
           baselineZero={selectedFlux === 'net'}

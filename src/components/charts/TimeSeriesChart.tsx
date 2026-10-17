@@ -13,7 +13,9 @@ import {
 import { calculateMovingAverage, calculateLinearTrend } from '../../analysis/math';
 import { DatasetMetadata, TimeSeriesPoint } from '../../types/dataset';
 import { formatScientificValue, formatYearOrMonth } from '../../utils/formatters';
-import { ExternalLink, TrendingUp, Sliders } from 'lucide-react';
+import { ExternalLink, TrendingUp, Sliders, Calculator, Calendar, Radio, Info } from 'lucide-react';
+import { StatusBadge } from '../common/StatusBadge';
+import { CacheStatus } from '../../types/api';
 
 interface TimeSeriesChartProps {
   data: TimeSeriesPoint[];
@@ -21,6 +23,7 @@ interface TimeSeriesChartProps {
   color?: string;
   showMovingAverageDefault?: boolean;
   baselineZero?: boolean;
+  status?: CacheStatus;
 }
 
 export type PeriodFilter = '10y' | '30y' | '100y' | 'max';
@@ -31,6 +34,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
   color = '#06b6d4', // cyan-500
   showMovingAverageDefault = false,
   baselineZero = false,
+  status,
 }) => {
   const [period, setPeriod] = useState<PeriodFilter>('max');
   const [movingAvgWindow, setMovingAvgWindow] = useState<number>(showMovingAverageDefault ? 12 : 0);
@@ -351,22 +355,61 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
         </div>
       )}
 
-      {/* Provenance Footer */}
-      <div className="mt-4 pt-3 border-t border-slate-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-400">
-        <div>
-          <span>Source : </span>
-          <a
-            href={metadata.sourceUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="text-cyan-400 hover:text-cyan-300 font-medium inline-flex items-center gap-1 transition"
-          >
-            {metadata.source} <ExternalLink className="w-3 h-3" />
-          </a>
+      {/* Provenance & Scientific Traceability Strip */}
+      <div className="mt-4 pt-3.5 border-t border-slate-800/80 space-y-2.5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs text-slate-300">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <span className="text-slate-400 font-mono text-[11px]">Statut :</span>
+            <StatusBadge
+              status={status || (metadata.provenanceType === 'embedded_historical' ? ('embedded_historical' as const) : ('live' as const))}
+              lastObservationDate={metadata.lastObservationDate || (data.length > 0 ? data[data.length - 1].timestamp : metadata.endDate)}
+              retrievedAt={metadata.retrievedAt}
+              compact
+            />
+            <span className="text-slate-600 hidden sm:inline">|</span>
+            <div>
+              <span className="text-slate-400">Source : </span>
+              <a
+                href={metadata.sourceUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-cyan-400 hover:text-cyan-300 font-medium inline-flex items-center gap-1 transition"
+              >
+                {metadata.organization} · {metadata.source} <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 text-[11px] font-mono text-slate-400">
+            <span>
+              Dernière obs. :{' '}
+              <strong className="text-slate-200">
+                {metadata.lastObservationDate || (data.length > 0 ? data[data.length - 1].timestamp : metadata.endDate)}
+              </strong>
+            </span>
+            <span className="text-slate-700">·</span>
+            <span>
+              Récupération : <strong className="text-slate-300">{metadata.retrievedAt}</strong>
+            </span>
+            <span className="text-slate-700">·</span>
+            <span>Fréq. : {metadata.frequency}</span>
+          </div>
         </div>
-        <div className="text-[11px] font-mono text-slate-400">
-          Fréquence : {metadata.frequency} · Plage : {metadata.startDate} → {metadata.endDate}
-        </div>
+
+        {/* Calculation method if derived or specified */}
+        {(metadata.isDerived || metadata.calculationMethod) && (
+          <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-2.5 text-[11px] text-slate-300 font-mono flex items-start gap-2">
+            <Calculator className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <span className="text-cyan-300 font-sans font-semibold">
+                Méthode de calcul & dérivation :{' '}
+              </span>
+              <span className="text-slate-300">
+                {metadata.calculationMethod || 'Série dérivée par agrégation temporelle et modélisation physique.'}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

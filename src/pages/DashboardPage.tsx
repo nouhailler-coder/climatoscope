@@ -3,6 +3,7 @@ import { NavTab } from '../components/common/Header';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { useDataset } from '../hooks/useDataset';
 import { formatScientificValue, formatAnomaly } from '../utils/formatters';
+import { calculateSeaIceTrend } from '../analysis/math';
 import {
   Sun,
   Flame,
@@ -27,6 +28,7 @@ interface DashboardPageProps {
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   const tsi = useDataset('solar-tsi-lisird');
+  const spots = useDataset('solar-sunspots-silso');
   const co2 = useDataset('co2-noaa-mauna-loa');
   const ch4 = useDataset('ghg-ch4-noaa');
   const temp = useDataset('temp-nasa-gistemp');
@@ -34,12 +36,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   const ice = useDataset('seaice-arctic-september-nsidc');
   const ocean = useDataset('ocean-ohc-argo-2000m');
   const ceres = useDataset('energy-ceres-net-toa');
+  const ceresOlr = useDataset('energy-ceres-olr-toa');
+  const ceresAlbedo = useDataset('energy-ceres-albedo-toa');
   const volcano = useDataset('volcano-saod-giss');
   const aerosols = useDataset('aerosols-cams-total-aod');
   const power = useDataset('nasa-power-radiation');
 
-  // Extracts latest value
+  // Extracts latest values directly from loaded datasets
   const latestTsi = tsi.dataset?.data && tsi.dataset.data.length > 0 ? tsi.dataset.data[tsi.dataset.data.length - 1] : undefined;
+  const spotsData = spots.dataset?.data;
+  const latestSpots = spotsData && spotsData.length > 0 ? spotsData[spotsData.length - 1] : undefined;
+
   const co2Data = co2.dataset?.data;
   const latestCo2 = co2Data && co2Data.length > 0 ? co2Data[co2Data.length - 1] : undefined;
   const latestCh4 = ch4.dataset?.data && ch4.dataset.data.length > 0 ? ch4.dataset.data[ch4.dataset.data.length - 1] : undefined;
@@ -69,8 +76,28 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
   const latestZonal = zonal.dataset?.data && zonal.dataset.data.length > 0 ? zonal.dataset.data[zonal.dataset.data.length - 1] : undefined;
   const latestIce = ice.dataset?.data && ice.dataset.data.length > 0 ? ice.dataset.data[ice.dataset.data.length - 1] : undefined;
-  const latestOcean = ocean.dataset?.data && ocean.dataset.data.length > 0 ? ocean.dataset.data[ocean.dataset.data.length - 1] : undefined;
+
+  // Sea ice trend regression calculated dynamically from loaded observations
+  const iceTrend = React.useMemo(() => {
+    if (!ice.dataset?.data || ice.dataset.data.length < 3) return null;
+    const pts = ice.dataset.data
+      .filter((d) => typeof d.value === 'number' && !isNaN(d.value))
+      .map((d) => ({ year: parseInt(d.timestamp, 10), value: d.value }));
+    return calculateSeaIceTrend(pts, 6.41);
+  }, [ice.dataset?.data]);
+
+  // Ocean heat annual accumulation rate from loaded observations
+  const oceanData = ocean.dataset?.data;
+  const latestOcean = oceanData && oceanData.length > 0 ? oceanData[oceanData.length - 1] : undefined;
+  const prevOcean = oceanData && oceanData.length > 1 ? oceanData[oceanData.length - 2] : undefined;
+  const oceanDeltaYear = latestOcean && prevOcean ? Number((latestOcean.value - prevOcean.value).toFixed(1)) : null;
+
   const latestCeres = ceres.dataset?.data && ceres.dataset.data.length > 0 ? ceres.dataset.data[ceres.dataset.data.length - 1] : undefined;
+  const olrData = ceresOlr.dataset?.data;
+  const latestOlr = olrData && olrData.length > 0 ? olrData[olrData.length - 1] : undefined;
+  const albedoData = ceresAlbedo.dataset?.data;
+  const latestAlbedo = albedoData && albedoData.length > 0 ? albedoData[albedoData.length - 1] : undefined;
+
   const latestVolcano = volcano.dataset?.data && volcano.dataset.data.length > 0 ? volcano.dataset.data[volcano.dataset.data.length - 1] : undefined;
   const latestAerosols = aerosols.dataset?.data && aerosols.dataset.data.length > 0 ? aerosols.dataset.data[aerosols.dataset.data.length - 1] : undefined;
   const latestPower = power.dataset?.data && power.dataset.data.length > 0 ? power.dataset.data[power.dataset.data.length - 1] : undefined;
@@ -154,15 +181,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                   {latestTsi?.value != null ? formatScientificValue(latestTsi.value, 'W/m²', 2) : 'Donnée indisponible'}
                 </span>
                 <span className="text-[10px] text-slate-400 block font-mono">
-                  {latestTsi?.timestamp ? `Année ${latestTsi.timestamp}` : 'Donnée indisponible'}
+                  {latestTsi?.timestamp ? `NASA TSIS-1 / TIM (${latestTsi.timestamp})` : 'Donnée indisponible'}
                 </span>
               </div>
               <div>
-                <span className="text-[11px] text-slate-400 font-mono block">Cycle de Schwabe :</span>
+                <span className="text-[11px] text-slate-400 font-mono block">Activité taches (WDC-SILSO) :</span>
                 <span className="text-sm font-semibold text-amber-300 font-mono mt-1 block">
-                  ~11 ans (Cycle 25)
+                  {latestSpots?.value != null ? `${latestSpots.value} taches (SSN)` : 'Donnée indisponible'}
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">Amplitude ~0,1%</span>
+                <span className="text-[10px] text-slate-400 block font-mono">
+                  {latestSpots?.timestamp
+                    ? `Cycle 25 (${latestSpots.timestamp}) · Amp. ~0,1%`
+                    : 'Donnée indisponible'}
+                </span>
               </div>
             </div>
 
@@ -200,7 +231,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 </span>
                 {co2DeltaYear !== null ? (
                   <span className="text-[10px] text-emerald-400 block font-mono">
-                    +{formatScientificValue(co2DeltaYear, 'ppm/an', 2)}
+                    +{formatScientificValue(co2DeltaYear, 'ppm/an', 2)} ({latestCo2?.timestamp})
                   </span>
                 ) : (
                   <span className="text-[10px] text-slate-500 block font-mono">
@@ -215,8 +246,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 </span>
                 <span className="text-[10px] text-slate-400 block font-mono">
                   {latestCh4?.value != null
-                    ? `+${Math.round(((latestCh4.value - 722) / 722) * 100)}% / préind.`
+                    ? `+${Math.round(((latestCh4.value - 722) / 722) * 100)}% vs 1750 (${latestCh4.timestamp})`
                     : 'Donnée indisponible'}
+                </span>
+                <span className="text-[9px] text-slate-500 block font-mono">
+                  Réf. 722 ppb (GIEC AR6)
                 </span>
               </div>
             </div>
@@ -309,11 +343,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 </span>
               </div>
               <div>
-                <span className="text-[11px] text-slate-400 font-mono block">Part énergétique :</span>
+                <span className="text-[11px] text-slate-400 font-mono block">Accumulation thermique :</span>
                 <span className="text-sm font-semibold text-blue-300 font-mono mt-1 block">
-                  &gt;90% du déséquilibre
+                  {oceanDeltaYear !== null ? `+${oceanDeltaYear} ZJ/an (${latestOcean?.timestamp})` : 'Donnée indisponible'}
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">1 ZJ = 10²¹ Joules</span>
+                <span className="text-[10px] text-slate-400 block font-mono">~91% du déséquilibre global (GIEC AR6)</span>
               </div>
             </div>
 
@@ -354,11 +388,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 </span>
               </div>
               <div>
-                <span className="text-[11px] text-slate-400 font-mono block">Composantes TOA :</span>
+                <span className="text-[11px] text-slate-400 font-mono block">Flux sortants TOA mesurés :</span>
                 <span className="text-sm font-semibold text-slate-200 font-mono mt-1 block">
-                  OLR ~241 · Albédo ~98
+                  {latestOlr?.value != null && latestAlbedo?.value != null
+                    ? `OLR ${latestOlr.value.toFixed(1)} · SW ${latestAlbedo.value.toFixed(1)} W/m²`
+                    : 'Donnée indisponible'}
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">Mesure satellitaire directe</span>
+                <span className="text-[10px] text-slate-400 block font-mono">
+                  {latestOlr?.timestamp ? `NASA CERES EBAF (${latestOlr.timestamp})` : 'Donnée indisponible'}
+                </span>
               </div>
             </div>
 
@@ -483,15 +521,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                   {latestIce?.value != null ? `${latestIce.value} M km²` : 'Donnée indisponible'}
                 </span>
                 <span className="text-[10px] text-rose-400 block font-mono">
-                  {latestIce?.timestamp ? `Année ${latestIce.timestamp} · -12,2% / déc.` : 'Donnée indisponible'}
+                  {latestIce?.timestamp && iceTrend
+                    ? `Année ${latestIce.timestamp} · ${iceTrend.decadalRatePercent > 0 ? '+' : ''}${iceTrend.decadalRatePercent}%/déc.`
+                    : latestIce?.timestamp
+                    ? `Année ${latestIce.timestamp}`
+                    : 'Donnée indisponible'}
                 </span>
               </div>
               <div>
-                <span className="text-[11px] text-slate-400 font-mono block">Rétroaction d'albédo :</span>
+                <span className="text-[11px] text-slate-400 font-mono block">Albédo glace vs océan :</span>
                 <span className="text-sm font-semibold text-slate-200 font-mono mt-1 block">
-                  α: 0,70 → 0,06
+                  α 0,70 vs 0,06 (GIEC / NSIDC)
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">Eau libre absorbe 94%</span>
+                <span className="text-[10px] text-slate-400 block font-mono">Absorption : 30% glace vs 94% eau</span>
               </div>
             </div>
 
@@ -581,9 +623,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <div>
                 <span className="text-[11px] text-slate-400 font-mono block">Forçage net masquant :</span>
                 <span className="text-sm font-semibold text-cyan-300 font-mono mt-1 block">
-                  ~ -1,1 W/m²
+                  ~ -1,1 W/m² (GIEC AR6)
                 </span>
-                <span className="text-[10px] text-slate-400 block font-mono">Effet parasol (Twomey)</span>
+                <span className="text-[10px] text-slate-400 block font-mono">Effet parasol direct & nuages (Twomey)</span>
               </div>
             </div>
 
