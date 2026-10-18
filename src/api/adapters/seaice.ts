@@ -89,7 +89,7 @@ async function fetchNsidcSeries(
     }
   }
 
-  return fallbackFn();
+  throw new Error('Échec du téléchargement direct NSIDC Sea Ice Index (tous miroirs indisponibles)');
 }
 
 export class SeaIceProvider extends BaseDataProvider {
@@ -152,12 +152,20 @@ export class SeaIceProvider extends BaseDataProvider {
     return getSeasonalCycleData();
   }
 
+  getArcticSeptData(): TimeSeriesPoint[] {
+    return getArcticSeptData();
+  }
+
   getAntarcticData(): TimeSeriesPoint[] {
     return getAntarcticFebData();
   }
 
   getArcticMarchData(): TimeSeriesPoint[] {
     return getArcticMarchData();
+  }
+
+  getSeasonalCycleData(): TimeSeriesPoint[] {
+    return getSeasonalCycleData();
   }
 
   getSeasonalCycleMonths(): SeasonalCycleMonth[] {

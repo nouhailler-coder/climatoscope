@@ -47,6 +47,10 @@ export class ZonalProvider extends BaseDataProvider {
     return getArcticZonalData();
   }
 
+  getArcticData(): TimeSeriesPoint[] {
+    return getArcticZonalData();
+  }
+
   getNorthMidData(): TimeSeriesPoint[] {
     return getNorthMidZonalData();
   }

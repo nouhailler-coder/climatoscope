@@ -51,9 +51,13 @@ export class LisirdProvider extends BaseDataProvider {
 
       if (points.length > 30) return points;
       throw new Error('Données LISIRD incomplètes');
-    } catch {
-      return getLisirdTsiData();
+    } catch (err) {
+      throw new Error(`Échec du téléchargement LASP LISIRD TSI: ${(err as Error).message}`);
     }
+  }
+
+  getBaselineData(): TimeSeriesPoint[] {
+    return getLisirdTsiData();
   }
 
   getSunspotsData(): { metadata: DatasetMetadata; data: TimeSeriesPoint[] } {

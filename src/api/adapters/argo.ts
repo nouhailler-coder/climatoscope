@@ -59,9 +59,13 @@ export class ArgoProvider extends BaseDataProvider {
 
       if (points.length > 30) return points;
       throw new Error('Données OHC incomplètes');
-    } catch {
-      return getArgoOhc2000mData();
+    } catch (err) {
+      throw new Error(`Échec du téléchargement NOAA/Argo OHC: ${(err as Error).message}`);
     }
+  }
+
+  getBaselineData(): TimeSeriesPoint[] {
+    return getArgoOhc2000mData();
   }
 
   get700mData(): TimeSeriesPoint[] {

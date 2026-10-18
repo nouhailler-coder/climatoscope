@@ -1,6 +1,7 @@
 /**
  * NOAA Global Monitoring Laboratory — Trace Greenhouse Gases Adapter (CH4, N2O, AGGI)
- * Real data provider for Methane, Nitrous Oxide, and Annual Greenhouse Gas Index
+ * Real data provider for Methane, Nitrous Oxide, and Annual Greenhouse Gas Index.
+ * Network calls propagate failures to the dataset service to avoid disguising fallbacks as live data.
  */
 
 import {
@@ -36,10 +37,10 @@ export class NoaaGhgProvider extends BaseDataProvider {
   async fetchData(options?: FetchOptions): Promise<TimeSeriesPoint[]> {
     const url = 'https://gml.noaa.gov/webdata/ccgg/trends/ch4/ch4_mm_gl.txt';
 
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
 
+    try {
       const response = await fetch(url, { signal: controller.signal });
       clearTimeout(timeoutId);
 
@@ -68,8 +69,9 @@ export class NoaaGhgProvider extends BaseDataProvider {
 
       if (points.length > 50) return points;
       throw new Error('Données NOAA CH4 incomplètes');
-    } catch {
-      return getNoaaCh4MonthlyData();
+    } catch (err) {
+      clearTimeout(timeoutId);
+      throw new Error(`Échec du téléchargement NOAA CH4: ${(err as Error).message}`);
     }
   }
 
@@ -77,13 +79,17 @@ export class NoaaGhgProvider extends BaseDataProvider {
     return getNoaaCh4AnnualData();
   }
 
+  getCh4BaselineData(): TimeSeriesPoint[] {
+    return getNoaaCh4MonthlyData();
+  }
+
   async fetchN2oData(options?: FetchOptions): Promise<TimeSeriesPoint[]> {
     const url = 'https://gml.noaa.gov/webdata/hats/n2o/combined/HATS_global_N2O.txt';
 
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
 
+    try {
       const response = await fetch(url, { signal: controller.signal });
       clearTimeout(timeoutId);
 
@@ -112,13 +118,18 @@ export class NoaaGhgProvider extends BaseDataProvider {
 
       if (points.length > 30) return points;
       throw new Error('Données NOAA N2O incomplètes');
-    } catch {
-      return getNoaaN2oMonthlyData();
+    } catch (err) {
+      clearTimeout(timeoutId);
+      throw new Error(`Échec du téléchargement NOAA N2O: ${(err as Error).message}`);
     }
   }
 
   getN2oAnnualData(): TimeSeriesPoint[] {
     return getNoaaN2oAnnualData();
+  }
+
+  getN2oBaselineData(): TimeSeriesPoint[] {
+    return getNoaaN2oMonthlyData();
   }
 
   getAggiData(): TimeSeriesPoint[] {

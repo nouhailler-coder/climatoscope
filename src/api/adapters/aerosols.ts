@@ -29,6 +29,10 @@ export class AerosolsProvider extends BaseDataProvider {
     return getCamsTotalAodData();
   }
 
+  getBaselineData(): TimeSeriesPoint[] {
+    return getCamsTotalAodData();
+  }
+
   getSo2Data(): TimeSeriesPoint[] {
     return getSo2EmissionsData();
   }

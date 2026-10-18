@@ -86,9 +86,11 @@ export class NasaPowerProvider extends BaseDataProvider {
 
       return points;
     } catch (err) {
-      console.warn('NASA POWER API live fetch failed, utilizing verified baseline dataset:', err);
-      // Fallback to verified local baseline dataset for the location
-      return getNasaPowerSampleData(this.currentLocation.id);
+      throw new Error(`Échec du téléchargement NASA POWER API: ${(err as Error).message}`);
     }
+  }
+
+  getBaselineData(): TimeSeriesPoint[] {
+    return getNasaPowerSampleData(this.currentLocation.id);
   }
 }

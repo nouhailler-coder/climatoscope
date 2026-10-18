@@ -66,9 +66,13 @@ export class CeresProvider extends BaseDataProvider {
 
       if (points.length >= 10) return points;
       throw new Error('Données CERES incomplètes');
-    } catch {
-      return getCeresNetData();
+    } catch (err) {
+      throw new Error(`Échec du téléchargement NASA CERES: ${(err as Error).message}`);
     }
+  }
+
+  getBaselineData(): TimeSeriesPoint[] {
+    return getCeresNetData();
   }
 
   getOlrData(): TimeSeriesPoint[] {

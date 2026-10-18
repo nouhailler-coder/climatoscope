@@ -390,12 +390,27 @@ class DatasetService {
         throw new Error(`Dataset non supporté: ${datasetId}`);
       }
     } catch (err) {
-      console.warn(`Échec fetch direct pour ${datasetId}, tentative utilisation cache:`, err);
-      // Graceful fallback to existing cache with stale_cache status
+      console.warn(`Échec fetch direct pour ${datasetId}, bascule sur cache ou repli historique:`, err);
+      // 1. If previous cached version exists in IndexedDB/memory, return it with status 'stale_cache'
       if (cached && cached.data && cached.data.length > 0) {
         return { dataset: cached, status: 'stale_cache' };
       }
-      throw err;
+
+      // 2. If no cache exists, load authentic embedded historical baseline with honest provenance
+      points = this.getBaselinePoints(datasetId);
+      metadata = this.enrichMetadata(metadata, datasetId, points);
+      metadata.provenanceType = 'embedded_historical';
+
+      const fallbackDataset: InternalDataset = {
+        metadata,
+        data: points,
+        // Authentic reference date, never confused with the present timestamp
+        lastUpdated: metadata.retrievedAt || metadata.endDate || '2025-01-15T00:00:00Z',
+        localCacheVersion: 1,
+      };
+
+      this.memoryCache.set(datasetId, fallbackDataset);
+      return { dataset: fallbackDataset, status: 'embedded_historical' };
     }
 
     // Enrich metadata with latest observation date and calculation method
@@ -523,6 +538,69 @@ class DatasetService {
     }
 
     return this.enrichMetadata(baseMeta, datasetId);
+  }
+
+  getBaselinePoints(datasetId: string): TimeSeriesPoint[] {
+    if (datasetId.startsWith('co2-noaa')) {
+      return this.noaaProvider.getBaselineData();
+    } else if (datasetId === 'ghg-ch4-noaa') {
+      return this.noaaGhgProvider.getCh4BaselineData();
+    } else if (datasetId === 'ghg-ch4-annual-noaa') {
+      return this.noaaGhgProvider.getCh4AnnualData();
+    } else if (datasetId === 'ghg-n2o-noaa') {
+      return this.noaaGhgProvider.getN2oBaselineData();
+    } else if (datasetId === 'ghg-n2o-annual-noaa') {
+      return this.noaaGhgProvider.getN2oAnnualData();
+    } else if (datasetId === 'ghg-aggi-noaa') {
+      return this.noaaGhgProvider.getAggiData();
+    } else if (datasetId.startsWith('temp-nasa')) {
+      return this.gistempProvider.getAnnualBaselineData();
+    } else if (datasetId.startsWith('temp-noaa')) {
+      return this.noaaTempProvider.getBaselineData();
+    } else if (datasetId.startsWith('temp-berkeley')) {
+      return this.berkeleyTempProvider.getBaselineData();
+    } else if (datasetId === 'solar-tsi-lisird') {
+      return this.lisirdProvider.getBaselineData();
+    } else if (datasetId === 'solar-sunspots-silso') {
+      return this.lisirdProvider.getSunspotsData().data;
+    } else if (datasetId === 'ocean-ohc-argo-2000m') {
+      return this.argoProvider.getBaselineData();
+    } else if (datasetId === 'ocean-ohc-argo-700m') {
+      return this.argoProvider.get700mData();
+    } else if (datasetId === 'energy-ceres-net-toa') {
+      return this.ceresProvider.getBaselineData();
+    } else if (datasetId === 'energy-ceres-olr-toa') {
+      return this.ceresProvider.getOlrData();
+    } else if (datasetId === 'energy-ceres-albedo-toa') {
+      return this.ceresProvider.getAlbedoData();
+    } else if (datasetId === 'volcano-saod-giss') {
+      return this.volcanoProvider.getBaselineData();
+    } else if (datasetId === 'seaice-arctic-september-nsidc') {
+      return this.seaIceProvider.getArcticSeptData();
+    } else if (datasetId === 'seaice-antarctic-february-nsidc') {
+      return this.seaIceProvider.getAntarcticData();
+    } else if (datasetId === 'seaice-arctic-march-nsidc') {
+      return this.seaIceProvider.getArcticMarchData();
+    } else if (datasetId === 'seaice-seasonal-cycle-nsidc') {
+      return this.seaIceProvider.getSeasonalCycleData();
+    } else if (datasetId === 'zonal-temp-arctic-era5') {
+      return this.zonalProvider.getArcticData();
+    } else if (datasetId === 'zonal-temp-northmid-era5') {
+      return this.zonalProvider.getNorthMidData();
+    } else if (datasetId === 'zonal-temp-tropics-era5') {
+      return this.zonalProvider.getTropicsData();
+    } else if (datasetId === 'zonal-temp-southmid-era5') {
+      return this.zonalProvider.getSouthMidData();
+    } else if (datasetId === 'zonal-temp-antarctic-era5') {
+      return this.zonalProvider.getAntarcticData();
+    } else if (datasetId === 'aerosols-cams-total-aod') {
+      return this.aerosolsProvider.getBaselineData();
+    } else if (datasetId === 'aerosols-so2-emissions-ceds') {
+      return this.aerosolsProvider.getSo2Data();
+    } else if (datasetId.startsWith('nasa-power')) {
+      return this.nasaPowerProvider.getBaselineData();
+    }
+    return [];
   }
 
   getAllCatalogMetadata(): DatasetMetadata[] {

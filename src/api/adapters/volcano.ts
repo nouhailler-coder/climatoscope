@@ -59,8 +59,12 @@ export class VolcanoProvider extends BaseDataProvider {
 
       if (points.length > 50) return points;
       throw new Error('Données SAOD incomplètes');
-    } catch {
-      return getNasaGissSaodData();
+    } catch (err) {
+      throw new Error(`Échec du téléchargement NASA GISS SAOD: ${(err as Error).message}`);
     }
+  }
+
+  getBaselineData(): TimeSeriesPoint[] {
+    return getNasaGissSaodData();
   }
 }

@@ -9,6 +9,7 @@ export interface FetchOptions {
   forceRefresh?: boolean;
   latitude?: number;
   longitude?: number;
+  frequency?: 'annual' | 'monthly';
 }
 
 export interface DataProvider {

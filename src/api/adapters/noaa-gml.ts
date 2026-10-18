@@ -19,11 +19,10 @@ export class NoaaGmlProvider extends BaseDataProvider {
 
   async fetchData(options?: FetchOptions): Promise<TimeSeriesPoint[]> {
     const url = 'https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_mm_mlo.txt';
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
 
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
-
       const response = await fetch(url, { signal: controller.signal });
       clearTimeout(timeoutId);
 
@@ -58,8 +57,12 @@ export class NoaaGmlProvider extends BaseDataProvider {
       }
       throw new Error('Données NOAA incomplètes');
     } catch (err) {
-      // Return authentic verified local baseline dataset
-      return getNoaaCo2Data();
+      clearTimeout(timeoutId);
+      throw new Error(`Échec du téléchargement NOAA CO2: ${(err as Error).message}`);
     }
+  }
+
+  getBaselineData(): TimeSeriesPoint[] {
+    return getNoaaCo2Data();
   }
 }
