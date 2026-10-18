@@ -35,8 +35,9 @@ export class NasaPowerProvider extends BaseDataProvider {
     const lat = options?.latitude ?? this.currentLocation.latitude;
     const lon = options?.longitude ?? this.currentLocation.longitude;
     const currentYear = new Date().getFullYear();
-    const endYear = currentYear;
-    const startYear = Math.max(2015, currentYear - 10);
+    // Dynamically request from 2000 to current year, or respect user specified interval
+    const startYear = options?.startDate ? parseInt(options.startDate.substring(0, 4), 10) : 2000;
+    const endYear = options?.endDate ? parseInt(options.endDate.substring(0, 4), 10) : currentYear;
 
     const url = `https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=ALLSKY_SFC_SW_DWN&community=RE&longitude=${lon}&latitude=${lat}&start=${startYear}&end=${endYear}&format=JSON`;
 

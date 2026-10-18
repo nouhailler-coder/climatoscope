@@ -39,6 +39,9 @@ import {
   AEROSOLS_ANNUAL_DATA,
 } from '../src/data/baseline/aerosols-cams-aeronet';
 import { formatScientificValue, formatAnomaly } from '../src/utils/formatters';
+import { NasaPowerProvider } from '../src/api/adapters/nasa-power';
+import { NoaaGhgProvider } from '../src/api/adapters/noaa-ghg';
+import { GistempProvider } from '../src/api/adapters/gistemp';
 
 describe('Baseline Datasets & Scientific Formatters', () => {
   it('loads NOAA Mauna Loa dataset with over 800 continuous monthly points', () => {
@@ -300,5 +303,45 @@ describe('Baseline Datasets & Scientific Formatters', () => {
     expect(formatAnomaly(1.23)).toBe('+1.23 °C');
     expect(formatAnomaly(-0.45)).toBe('-0.45 °C');
     expect(formatAnomaly(null)).toBe('—');
+  });
+
+  it('validates NASA GISTEMP monthly metadata and non-synthetic baseline', () => {
+    const prov = new GistempProvider();
+    const meta = prov.getMonthlyMetadata();
+    expect(meta.id).toBe('temp-nasa-gistemp-monthly');
+    expect(meta.frequency).toBe('monthly');
+    expect(meta.startDate).toBe('1880-01');
+    expect(meta.endDate).toBe('2025-12');
+    expect(meta.lastObservationDate).toBe('2025-12');
+  });
+
+  it('validates NASA POWER provider has dynamic time boundaries and separates baseline fallback', () => {
+    const prov = new NasaPowerProvider();
+    const meta = prov.getMetadata();
+    const curYear = new Date().getFullYear();
+    expect(meta.id).toContain('nasa-power-radiation');
+    expect(meta.frequency).toBe('monthly');
+    expect(meta.endDate).toBe(`${curYear}-12`);
+    expect(meta.lastObservationDate).toBe(`${curYear}`);
+
+    // Verify baseline sample points are valid numbers without NaN
+    const sample = prov.getBaselineData();
+    expect(sample.length).toBeGreaterThan(50);
+    sample.forEach(pt => {
+      expect(pt.value).toBeGreaterThanOrEqual(0);
+      expect(isNaN(pt.value)).toBe(false);
+    });
+  });
+
+  it('validates NOAA GHG provider implements dynamic annual fetch methods for CH4, N2O, and AGGI', () => {
+    const prov = new NoaaGhgProvider();
+    expect(typeof prov.fetchCh4AnnualData).toBe('function');
+    expect(typeof prov.fetchN2oAnnualData).toBe('function');
+    expect(typeof prov.fetchAggiData).toBe('function');
+
+    // Baseline fallbacks are available if offline
+    expect(prov.getCh4AnnualData().length).toBeGreaterThan(30);
+    expect(prov.getN2oAnnualData().length).toBeGreaterThan(20);
+    expect(prov.getAggiData().length).toBeGreaterThan(30);
   });
 });

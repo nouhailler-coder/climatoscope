@@ -29,6 +29,8 @@ export interface DatasetMetadata {
   endDate: string;
   baselinePeriod?: string; // e.g. "1951-1980" for GISTEMP
   retrievedAt: string;
+  publicationDate?: string;
+  lastSuccessfulFetch?: string;
   license?: string;
   description: string;
   isProxyOrReconstruction?: boolean;

@@ -17,7 +17,7 @@ import {
 import { calculatePearsonCorrelation, calculateLinearTrend } from '../analysis/math';
 import { Thermometer, Info, Layers, Scale, ExternalLink, Calendar, Calculator, CheckCircle2 } from 'lucide-react';
 
-type TempSource = 'temp-nasa-gistemp' | 'temp-noaa-globaltemp' | 'temp-berkeley-earth' | 'compare-all';
+type TempSource = 'temp-nasa-gistemp' | 'temp-nasa-gistemp-monthly' | 'temp-noaa-globaltemp' | 'temp-berkeley-earth' | 'compare-all';
 
 export const TemperaturePage: React.FC = () => {
   const [selectedSource, setSelectedSource] = useState<TempSource>('temp-nasa-gistemp');
@@ -130,7 +130,8 @@ export const TemperaturePage: React.FC = () => {
         </span>
         <div className="inline-flex flex-wrap rounded-lg bg-slate-950 p-1 border border-slate-800 text-xs">
           {[
-            { id: 'temp-nasa-gistemp' as TempSource, label: 'NASA GISTEMP v4', ref: 'Ref. 1951-1980' },
+            { id: 'temp-nasa-gistemp' as TempSource, label: 'NASA GISTEMP v4 (Annuel)', ref: '1880–2025' },
+            { id: 'temp-nasa-gistemp-monthly' as TempSource, label: 'NASA GISTEMP v4 (Mensuel)', ref: 'Flux direct 1880–2025' },
             { id: 'temp-noaa-globaltemp' as TempSource, label: 'NOAA GlobalTemp', ref: 'Ref. 1901-2000' },
             { id: 'temp-berkeley-earth' as TempSource, label: 'Berkeley Earth', ref: 'Ref. 1951-1980' },
             { id: 'compare-all' as TempSource, label: 'Comparateur Inter-Instituts', ref: '3 Séries Indépendantes' },
@@ -169,15 +170,29 @@ export const TemperaturePage: React.FC = () => {
             <StatusBadge status={temp.status} compact />
           </div>
           <div className="flex items-center justify-between text-slate-300">
-            <span className="text-slate-400">Type de source :</span>
+            <span className="text-slate-400">Provenance :</span>
             <span className="text-cyan-300 font-semibold">
               {temp.dataset?.metadata.provenanceType === 'live_feed' ? 'Flux en direct' : 'Historique embarqué'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-slate-300">
+            <span className="text-slate-400">Période couverte :</span>
+            <span className="text-slate-200 font-semibold">
+              {temp.dataset?.metadata.startDate || '1880'} → {temp.dataset?.metadata.endDate || '2025'}
             </span>
           </div>
           <div className="flex items-center justify-between text-slate-300">
             <span className="text-slate-400">Dernière observation :</span>
             <span className="text-emerald-400 font-bold">
               {temp.dataset?.metadata.lastObservationDate || temp.dataset?.metadata.endDate || '...'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-slate-300">
+            <span className="text-slate-400">Dernier téléchargement :</span>
+            <span className="text-slate-300 text-[10px]">
+              {temp.dataset?.metadata.lastSuccessfulFetch
+                ? new Date(temp.dataset.metadata.lastSuccessfulFetch).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })
+                : (temp.status === 'live' ? 'À l\'instant' : 'Non actualisé en direct')}
             </span>
           </div>
         </div>

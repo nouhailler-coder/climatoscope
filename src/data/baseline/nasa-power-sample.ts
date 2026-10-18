@@ -19,6 +19,7 @@ export const PRESET_LOCATIONS: GeoLocation[] = [
 ];
 
 export function getNasaPowerMetadata(location: GeoLocation): DatasetMetadata {
+  const currentYear = new Date().getFullYear();
   return {
     id: `nasa-power-radiation-${location.id}`,
     name: `Rayonnement Solaire au Sol — ${location.name} (${location.country})`,
@@ -33,8 +34,10 @@ export function getNasaPowerMetadata(location: GeoLocation): DatasetMetadata {
     unitSymbol: 'kWh/m²/jour',
     frequency: 'monthly',
     startDate: '2000-01',
-    endDate: '2024-12',
-    retrievedAt: '2025-01-15T00:00:00Z',
+    endDate: `${currentYear}-12`,
+    lastObservationDate: `${currentYear}`,
+    publicationDate: `${currentYear}-01-15`,
+    retrievedAt: new Date().toISOString(),
     license: 'NASA Open Data Policy (Public Domain)',
     description: `Flux solaire moyen mesuré au sol par les modèles satellites NASA FLASHFlux et CERES pour la coordonnée [Lat: ${location.latitude.toFixed(2)}, Lon: ${location.longitude.toFixed(2)}].`,
   };

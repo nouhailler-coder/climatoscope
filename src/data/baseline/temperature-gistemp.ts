@@ -9,7 +9,7 @@ import { DatasetMetadata, TimeSeriesPoint } from '../../types/dataset';
 
 export const GISTEMP_METADATA: DatasetMetadata = {
   id: 'temp-nasa-gistemp',
-  name: 'Anomalie de Température Globale — NASA GISTEMP v4',
+  name: 'Anomalie de Température Globale — NASA GISTEMP v4 (Moyenne Annuelle)',
   shortName: 'GISTEMP v4 (NASA)',
   organization: 'NASA Goddard Institute for Space Studies',
   source: 'NASA GISS Surface Temperature Analysis (GISTEMP v4)',
@@ -19,14 +19,40 @@ export const GISTEMP_METADATA: DatasetMetadata = {
   variableSymbol: 'ΔT',
   unit: 'Degrés Celsius (anomalie relative à 1951-1980)',
   unitSymbol: '°C',
-  frequency: 'monthly',
-  startDate: '1880-01',
-  endDate: '2025-12',
+  frequency: 'annual',
+  startDate: '1880',
+  endDate: '2025',
+  lastObservationDate: '2025',
   baselinePeriod: '1951-1980',
-  retrievedAt: '2025-01-15T00:00:00Z',
+  publicationDate: '2026-01-15',
+  retrievedAt: '2026-01-15T00:00:00Z',
   license: 'NASA Open Data Policy (Domaine public US)',
   description:
     'Indice global combinant les températures de surface des terres émergées (GHCN v4) et la température de surface de la mer (ERSST v5). Période de référence : 1951-1980.',
+};
+
+export const GISTEMP_MONTHLY_METADATA: DatasetMetadata = {
+  id: 'temp-nasa-gistemp-monthly',
+  name: 'Anomalie Mensuelle de Température Globale — NASA GISTEMP v4',
+  shortName: 'GISTEMP Mensuel (NASA)',
+  organization: 'NASA Goddard Institute for Space Studies',
+  source: 'NASA GISS Surface Temperature Analysis (GISTEMP v4)',
+  sourceUrl: 'https://data.giss.nasa.gov/gistemp/',
+  methodologyUrl: 'https://data.giss.nasa.gov/gistemp/references.html',
+  variable: 'Anomalie mensuelle de température globale terre-océan',
+  variableSymbol: 'ΔT_m',
+  unit: 'Degrés Celsius (anomalie relative à 1951-1980)',
+  unitSymbol: '°C',
+  frequency: 'monthly',
+  startDate: '1880-01',
+  endDate: '2025-12',
+  lastObservationDate: '2025-12',
+  baselinePeriod: '1951-1980',
+  publicationDate: '2026-01-15',
+  retrievedAt: '2026-01-15T00:00:00Z',
+  license: 'NASA Open Data Policy (Domaine public US)',
+  description:
+    'Observations mensuelles directes sans dérivation synthétique combinant GHCN v4 et ERSST v5 extraites de la table officielle NASA GISS GLB.Ts+dSST.csv.',
 };
 
 export const NOAA_TEMPANOMALY_METADATA: DatasetMetadata = {
@@ -44,8 +70,10 @@ export const NOAA_TEMPANOMALY_METADATA: DatasetMetadata = {
   frequency: 'annual',
   startDate: '1880',
   endDate: '2025',
+  lastObservationDate: '2025',
   baselinePeriod: '1901-2000 (Moyenne 20e siècle)',
-  retrievedAt: '2025-01-15T00:00:00Z',
+  publicationDate: '2026-01-15',
+  retrievedAt: '2026-01-15T00:00:00Z',
   license: 'Domaine public gouvernemental des États-Unis',
   description:
     'Série de référence de la NOAA pour le suivi des anomalies thermiques planétaires par rapport à la moyenne séculaire du 20e siècle.',
@@ -66,8 +94,10 @@ export const BERKELEY_TEMP_METADATA: DatasetMetadata = {
   frequency: 'annual',
   startDate: '1880',
   endDate: '2025',
+  lastObservationDate: '2025',
   baselinePeriod: '1951-1980',
-  retrievedAt: '2025-01-15T00:00:00Z',
+  publicationDate: '2026-01-15',
+  retrievedAt: '2026-01-15T00:00:00Z',
   license: 'Creative Commons CC-BY 4.0',
   description:
     'Reconstruction indépendante intégrant plus de 30 000 stations terrestres et les données océaniques avec un algorithme de pondération spatiale innovant.',

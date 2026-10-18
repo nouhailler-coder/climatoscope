@@ -6,6 +6,7 @@
 
 import {
   GISTEMP_METADATA,
+  GISTEMP_MONTHLY_METADATA,
   NOAA_TEMPANOMALY_METADATA,
   BERKELEY_TEMP_METADATA,
   getGistempAnnualData,
@@ -23,6 +24,10 @@ export class GistempProvider extends BaseDataProvider {
 
   getMetadata(): DatasetMetadata {
     return GISTEMP_METADATA;
+  }
+
+  getMonthlyMetadata(): DatasetMetadata {
+    return GISTEMP_MONTHLY_METADATA;
   }
 
   /**
@@ -91,16 +96,22 @@ export class GistempProvider extends BaseDataProvider {
   }
 
   /**
-   * Dedicated method extracting all 12 monthly columns from official NASA GISTEMP CSV
+   * Dedicated method extracting all 12 monthly columns from official NASA GISTEMP CSV online
    */
-  async fetchMonthlyData(): Promise<TimeSeriesPoint[]> {
-    return this.fetchData({ frequency: 'monthly' });
+  async fetchMonthlyData(options?: FetchOptions): Promise<TimeSeriesPoint[]> {
+    return this.fetchData({ ...options, frequency: 'monthly' });
   }
 
+  /**
+   * Offline reference fallback for monthly observations (never called in live online path)
+   */
   getMonthlyData(): TimeSeriesPoint[] {
     return getGistempMonthlyData();
   }
 
+  /**
+   * Offline reference fallback for annual observations (never called in live online path)
+   */
   getAnnualBaselineData(): TimeSeriesPoint[] {
     return getGistempAnnualData();
   }

@@ -65,6 +65,11 @@ const PROVENANCE_REGISTRY: Record<string, ProvenanceDefinition> = {
     sourceUrl: 'https://data.giss.nasa.gov/gistemp/',
     calculationMethod: 'Analyse GISS Surface Temperature (GISTEMP v4) combinant stations terrestres GHCN v4 et températures de surface de la mer ERSST v5 (maille 250 km).'
   },
+  'temp-nasa-gistemp-monthly': {
+    provenanceType: 'live_feed',
+    sourceUrl: 'https://data.giss.nasa.gov/gistemp/',
+    calculationMethod: 'Extraction mensuelle directe de la table officielle NASA GISS GLB.Ts+dSST.csv (anomalies mensuelles 1880–présent par rapport à 1951–1980).'
+  },
   'temp-noaa-globaltemp': {
     provenanceType: 'live_feed',
     sourceUrl: 'https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/time-series',
@@ -179,6 +184,11 @@ const PROVENANCE_REGISTRY: Record<string, ProvenanceDefinition> = {
     provenanceType: 'live_feed',
     sourceUrl: 'https://power.larc.nasa.gov/',
     calculationMethod: 'Insolation journalière reçue au sol (ALLSKY_SFC_SW_DWN en kWh/m²/j) extraite via l\'API NASA Langley POWER.'
+  },
+  'nasa-power-radiation': {
+    provenanceType: 'live_feed',
+    sourceUrl: 'https://power.larc.nasa.gov/',
+    calculationMethod: 'Rayonnement solaire descendant tout ciel au sol (ALLSKY_SFC_SW_DWN en kWh/m²/j) extrait via l\'API NASA Langley POWER.'
   }
 };
 
@@ -283,32 +293,33 @@ class DatasetService {
         points = await this.noaaGhgProvider.fetchData({ forceRefresh });
         metadata = this.noaaGhgProvider.getMetadata();
       } else if (datasetId === 'ghg-ch4-annual-noaa') {
-        points = this.noaaGhgProvider.getCh4AnnualData();
+        points = await this.noaaGhgProvider.fetchCh4AnnualData({ forceRefresh });
         metadata = {
           ...this.noaaGhgProvider.getMetadata(),
           id: 'ghg-ch4-annual-noaa',
           name: 'Méthane Atmosphérique Global (CH₄ - Moyenne Annuelle)',
           frequency: 'annual'
         };
-        status = 'embedded_historical';
       } else if (datasetId === 'ghg-n2o-noaa') {
         points = await this.noaaGhgProvider.fetchN2oData({ forceRefresh });
         metadata = this.noaaGhgProvider.getN2oMetadata();
       } else if (datasetId === 'ghg-n2o-annual-noaa') {
-        points = this.noaaGhgProvider.getN2oAnnualData();
+        points = await this.noaaGhgProvider.fetchN2oAnnualData({ forceRefresh });
         metadata = {
           ...this.noaaGhgProvider.getN2oMetadata(),
           id: 'ghg-n2o-annual-noaa',
           name: 'Protoxyde d\'Azote (N₂O - Moyenne Annuelle)',
           frequency: 'annual'
         };
-        status = 'embedded_historical';
       } else if (datasetId === 'ghg-aggi-noaa') {
-        points = this.noaaGhgProvider.getAggiData();
+        points = await this.noaaGhgProvider.fetchAggiData({ forceRefresh });
         metadata = this.noaaGhgProvider.getAggiMetadata();
-        status = 'embedded_historical';
+      } else if (datasetId === 'temp-nasa-gistemp-monthly') {
+        points = await this.gistempProvider.fetchMonthlyData({ forceRefresh });
+        metadata = this.gistempProvider.getMonthlyMetadata();
       } else if (datasetId.startsWith('temp-nasa')) {
         points = await this.gistempProvider.fetchData({ forceRefresh });
+        metadata = this.gistempProvider.getMetadata();
       } else if (datasetId.startsWith('temp-noaa')) {
         // Real independent NOAA GlobalTemp provider with live API fetch
         points = await this.noaaTempProvider.fetchData({ forceRefresh });
@@ -439,7 +450,8 @@ class DatasetService {
     datasetId: string,
     points?: TimeSeriesPoint[]
   ): DatasetMetadata {
-    const prov = PROVENANCE_REGISTRY[datasetId];
+    const prov = PROVENANCE_REGISTRY[datasetId] ||
+      (datasetId.startsWith('nasa-power') ? PROVENANCE_REGISTRY['nasa-power-radiation'] : undefined);
     const enriched = { ...meta };
 
     if (prov) {
@@ -471,6 +483,8 @@ class DatasetService {
       baseMeta = this.noaaGhgProvider.getN2oMetadata();
     } else if (datasetId === 'ghg-aggi-noaa') {
       baseMeta = this.noaaGhgProvider.getAggiMetadata();
+    } else if (datasetId === 'temp-nasa-gistemp-monthly') {
+      baseMeta = this.gistempProvider.getMonthlyMetadata();
     } else if (datasetId.startsWith('temp-nasa')) {
       baseMeta = this.gistempProvider.getMetadata();
     } else if (datasetId.startsWith('temp-noaa')) {
@@ -553,6 +567,8 @@ class DatasetService {
       return this.noaaGhgProvider.getN2oAnnualData();
     } else if (datasetId === 'ghg-aggi-noaa') {
       return this.noaaGhgProvider.getAggiData();
+    } else if (datasetId === 'temp-nasa-gistemp-monthly') {
+      return this.gistempProvider.getMonthlyData();
     } else if (datasetId.startsWith('temp-nasa')) {
       return this.gistempProvider.getAnnualBaselineData();
     } else if (datasetId.startsWith('temp-noaa')) {
@@ -606,6 +622,7 @@ class DatasetService {
   getAllCatalogMetadata(): DatasetMetadata[] {
     const ids = [
       'temp-nasa-gistemp',
+      'temp-nasa-gistemp-monthly',
       'temp-noaa-globaltemp',
       'temp-berkeley-earth',
       'co2-noaa-mauna-loa',

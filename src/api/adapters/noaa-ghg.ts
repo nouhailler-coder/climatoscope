@@ -75,6 +75,69 @@ export class NoaaGhgProvider extends BaseDataProvider {
     }
   }
 
+  /**
+   * Downloads official NOAA CH4 annual means or recalculates them dynamically from live monthly observations
+   */
+  async fetchCh4AnnualData(options?: FetchOptions): Promise<TimeSeriesPoint[]> {
+    const url = 'https://gml.noaa.gov/webdata/ccgg/trends/ch4/ch4_annmean_gl.txt';
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (response.ok) {
+        const text = await response.text();
+        const lines = text.split('\n');
+        const points: TimeSeriesPoint[] = [];
+        for (const line of lines) {
+          if (line.startsWith('#') || !line.trim()) continue;
+          const parts = line.trim().split(/\s+/);
+          if (parts.length >= 2 && /^\d{4}$/.test(parts[0])) {
+            const year = parts[0];
+            const val = parseFloat(parts[1]);
+            const unc = parts[2] ? parseFloat(parts[2]) : undefined;
+            if (!isNaN(val) && val > 1000 && val < 3000) {
+              points.push({
+                timestamp: year,
+                value: val,
+                uncertainty: isNaN(unc!) ? undefined : unc,
+                qualityFlag: 'valid',
+              });
+            }
+          }
+        }
+        if (points.length >= 20) return points;
+      }
+    } catch {
+      clearTimeout(timeoutId);
+    }
+
+    // Fallback: recalculate annual averages dynamically from live monthly observations
+    const monthlyPoints = await this.fetchData(options);
+    const byYear: Record<string, number[]> = {};
+    for (const pt of monthlyPoints) {
+      const year = pt.timestamp.substring(0, 4);
+      if (!byYear[year]) byYear[year] = [];
+      byYear[year].push(pt.value);
+    }
+
+    const calculated: TimeSeriesPoint[] = [];
+    for (const [year, vals] of Object.entries(byYear)) {
+      if (vals.length >= 8) {
+        const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+        calculated.push({
+          timestamp: year,
+          value: Number(avg.toFixed(2)),
+          qualityFlag: 'valid',
+        });
+      }
+    }
+    calculated.sort((a, b) => parseInt(a.timestamp, 10) - parseInt(b.timestamp, 10));
+    if (calculated.length >= 20) return calculated;
+    throw new Error('Échec du calcul des moyennes annuelles NOAA CH4');
+  }
+
   getCh4AnnualData(): TimeSeriesPoint[] {
     return getNoaaCh4AnnualData();
   }
@@ -124,12 +187,81 @@ export class NoaaGhgProvider extends BaseDataProvider {
     }
   }
 
+  /**
+   * Recalculates annual global N2O averages dynamically from live monthly observations
+   */
+  async fetchN2oAnnualData(options?: FetchOptions): Promise<TimeSeriesPoint[]> {
+    const monthlyPoints = await this.fetchN2oData(options);
+    const byYear: Record<string, number[]> = {};
+    for (const pt of monthlyPoints) {
+      const year = pt.timestamp.substring(0, 4);
+      if (!byYear[year]) byYear[year] = [];
+      byYear[year].push(pt.value);
+    }
+
+    const calculated: TimeSeriesPoint[] = [];
+    for (const [year, vals] of Object.entries(byYear)) {
+      if (vals.length >= 6) {
+        const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+        calculated.push({
+          timestamp: year,
+          value: Number(avg.toFixed(2)),
+          qualityFlag: 'valid',
+        });
+      }
+    }
+    calculated.sort((a, b) => parseInt(a.timestamp, 10) - parseInt(b.timestamp, 10));
+    if (calculated.length >= 15) return calculated;
+    throw new Error('Échec du calcul des moyennes annuelles NOAA N2O');
+  }
+
   getN2oAnnualData(): TimeSeriesPoint[] {
     return getNoaaN2oAnnualData();
   }
 
   getN2oBaselineData(): TimeSeriesPoint[] {
     return getNoaaN2oMonthlyData();
+  }
+
+  /**
+   * Downloads official NOAA AGGI table
+   */
+  async fetchAggiData(options?: FetchOptions): Promise<TimeSeriesPoint[]> {
+    const url = 'https://gml.noaa.gov/aggi/aggi.dat';
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) throw new Error(`NOAA AGGI HTTP ${response.status}`);
+      const text = await response.text();
+      const lines = text.split('\n');
+      const points: TimeSeriesPoint[] = [];
+
+      for (const line of lines) {
+        if (line.startsWith('#') || !line.trim()) continue;
+        const parts = line.trim().split(/\s+/);
+        if (parts.length >= 9 && /^\d{4}$/.test(parts[0])) {
+          const year = parts[0];
+          const aggi = parseFloat(parts[8]);
+          if (!isNaN(aggi) && aggi >= 0.5 && aggi <= 2.5) {
+            points.push({
+              timestamp: year,
+              value: aggi,
+              qualityFlag: 'valid',
+            });
+          }
+        }
+      }
+
+      if (points.length >= 20) return points;
+      throw new Error('Données NOAA AGGI insuffisantes');
+    } catch (err) {
+      clearTimeout(timeoutId);
+      throw new Error(`Échec du téléchargement NOAA AGGI: ${(err as Error).message}`);
+    }
   }
 
   getAggiData(): TimeSeriesPoint[] {
