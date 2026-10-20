@@ -22,8 +22,10 @@ export const NSIDC_ARCTIC_SEPT_METADATA: DatasetMetadata = {
   frequency: 'annual',
   startDate: '1979',
   endDate: '2025',
+  lastObservationDate: '2025',
   baselinePeriod: '1981-2010 (Moyenne = 6,41 M km²)',
-  retrievedAt: '2025-02-28T00:00:00Z',
+  publicationDate: '2026-01-15',
+  retrievedAt: '2026-01-15T00:00:00Z',
   license: 'Open Data NASA / NOAA / NSIDC (Creative Commons Attribution 4.0)',
   description:
     'Mesure satellite par radiométrie micro-ondes passive de l’étendue de la banquise au pôle Nord à la fin de la saison de fonte estivale (septembre). Représente le volume de glace pluriannuelle résiduelle et constitue le marqueur le plus emblématique de la cryosphère.',
@@ -44,8 +46,10 @@ export const NSIDC_ANTARCTIC_FEB_METADATA: DatasetMetadata = {
   frequency: 'annual',
   startDate: '1979',
   endDate: '2025',
+  lastObservationDate: '2025',
   baselinePeriod: '1981-2010 (Moyenne = 2,87 M km²)',
-  retrievedAt: '2025-02-28T00:00:00Z',
+  publicationDate: '2026-01-15',
+  retrievedAt: '2026-01-15T00:00:00Z',
   license: 'Open Data NASA / NSIDC',
   description:
     'Mesure satellite par micro-ondes passives du minimum estival de la banquise australe entourant le continent Antarctique en février. Fortement influencée par les vents catabatiques, l’oscillation SAM (Southern Annular Mode) et l’océan Austral.',

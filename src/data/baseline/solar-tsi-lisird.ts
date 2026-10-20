@@ -22,7 +22,9 @@ export const LISIRD_TSI_METADATA: DatasetMetadata = {
   frequency: 'annual',
   startDate: '1880',
   endDate: '2025',
-  retrievedAt: '2025-01-15T00:00:00Z',
+  lastObservationDate: '2025',
+  publicationDate: '2026-01-15',
+  retrievedAt: '2026-01-15T00:00:00Z',
   license: 'Open Access / NASA Earth Science Data',
   description:
     'Mesure et reconstruction du flux énergétique électromagnétique solaire total intégré sur toutes les longueurs d’onde intercepté au sommet de l’atmosphère terrestre (à 1 UA). Les instruments radiométriques spatiaux (TIM) établissent la référence moderne à ~1361 W/m² avec une oscillation cyclique d’environ 1 W/m² (~0,07%).',

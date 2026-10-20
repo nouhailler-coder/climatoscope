@@ -22,7 +22,9 @@ export const NOAA_CO2_METADATA: DatasetMetadata = {
   frequency: 'monthly',
   startDate: '1958-03',
   endDate: '2025-12',
-  retrievedAt: '2025-01-15T00:00:00Z',
+  lastObservationDate: '2025-12',
+  publicationDate: '2026-01-15',
+  retrievedAt: '2026-01-15T00:00:00Z',
   license: 'Domaine public gouvernemental des États-Unis (NOAA Open Data)',
   description:
     'Série continue pionnière initiée par C. David Keeling mesurant la concentration de dioxyde de carbone à 3397 m d’altitude sur l’île d’Hawaï, isolée de la pollution continentale directe.',

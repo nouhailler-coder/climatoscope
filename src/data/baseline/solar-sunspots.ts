@@ -22,7 +22,9 @@ export const SILSO_SUNSPOTS_METADATA: DatasetMetadata = {
   frequency: 'annual',
   startDate: '1880',
   endDate: '2025',
-  retrievedAt: '2025-01-15T00:00:00Z',
+  lastObservationDate: '2025',
+  publicationDate: '2026-01-15',
+  retrievedAt: '2026-01-15T00:00:00Z',
   license: 'Creative Commons CC-BY-NC 4.0',
   description:
     'Série continue historique du nombre de taches solaires (formule de Wolf révisée v2.0 en 2015). Permet de tracer les cycles solaires de Schwabe (~11 ans) et d’analyser le magnétisme de l’étoile.',

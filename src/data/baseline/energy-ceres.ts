@@ -26,8 +26,10 @@ export const CERES_NET_METADATA: DatasetMetadata = {
   frequency: 'annual',
   startDate: '2000',
   endDate: '2025',
+  lastObservationDate: '2025',
   baselinePeriod: 'Bilan radiatif direct (0 W/m² = Équilibre thermique parfait)',
-  retrievedAt: '2025-01-15T00:00:00Z',
+  publicationDate: '2026-01-15',
+  retrievedAt: '2026-01-15T00:00:00Z',
   license: 'NASA Open Data Policy (Domaine public US)',
   description:
     'Mesure satellite radiométrique du flux énergétique net absorbé par la Terre au sommet de l’atmosphère. Une valeur positive indique que la Terre absorbe plus d’énergie solaire qu’elle ne renvoie d’énergie vers l’espace sous forme de rayonnement thermique ou réfléchi.',
@@ -48,7 +50,9 @@ export const CERES_OLR_METADATA: DatasetMetadata = {
   frequency: 'annual',
   startDate: '2000',
   endDate: '2025',
-  retrievedAt: '2025-01-15T00:00:00Z',
+  lastObservationDate: '2025',
+  publicationDate: '2026-01-15',
+  retrievedAt: '2026-01-15T00:00:00Z',
   license: 'NASA Open Data Policy',
   description:
     'Flux électromagnétique infrarouge thermique émis vers l’espace par la surface et l’atmosphère terrestre. Modulation sensible aux gaz à effet de serre et à la température de surface.',
@@ -69,7 +73,9 @@ export const CERES_ALBEDO_METADATA: DatasetMetadata = {
   frequency: 'annual',
   startDate: '2000',
   endDate: '2025',
-  retrievedAt: '2025-01-15T00:00:00Z',
+  lastObservationDate: '2025',
+  publicationDate: '2026-01-15',
+  retrievedAt: '2026-01-15T00:00:00Z',
   license: 'NASA Open Data Policy',
   description:
     'Part de la lumière solaire incidente immédiatement renvoyée vers l’espace par les nuages, les aérosols et la surface (albédo planétaire moyen ~29%).',

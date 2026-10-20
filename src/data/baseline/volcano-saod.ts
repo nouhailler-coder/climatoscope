@@ -137,8 +137,10 @@ export const NASA_GISS_SAOD_METADATA: DatasetMetadata = {
   frequency: 'annual',
   startDate: '1880',
   endDate: '2025',
+  lastObservationDate: '2025',
   baselinePeriod: 'Bruit de fond hors éruption (~0.003 - 0.007)',
-  retrievedAt: '2025-01-15T00:00:00Z',
+  publicationDate: '2026-01-15',
+  retrievedAt: '2026-01-15T00:00:00Z',
   license: 'NASA Open Data Policy (Domaine public US)',
   description:
     'Mesure et reconstruction de la concentration des gouttelettes d’aérosols d’acide sulfurique (H₂SO₄) en suspension dans la haute atmosphère. Les pics correspondent aux éruptions volcaniques explosives majeures qui renvoient la lumière solaire et induisent un refroidissement temporaire de 1 à 3 ans.',

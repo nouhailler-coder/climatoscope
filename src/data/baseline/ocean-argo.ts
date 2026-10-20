@@ -22,8 +22,10 @@ export const ARGO_OHC_2000M_METADATA: DatasetMetadata = {
   frequency: 'annual',
   startDate: '1955',
   endDate: '2025',
+  lastObservationDate: '2025',
   baselinePeriod: '1981-2010 (Moyenne = 0 ZJ)',
-  retrievedAt: '2025-01-15T00:00:00Z',
+  publicationDate: '2026-01-15',
+  retrievedAt: '2026-01-15T00:00:00Z',
   license: 'Domaine public gouvernemental des États-Unis / Open Access',
   description:
     'Mesure intégrée de l’énergie thermique stockée dans l’océan mondial de la surface jusqu’à 2 000 mètres de profondeur. Plus de 90% de l’excédent d’énergie du système climatique s’accumule dans l’océan, faisant de l’OHC l’indicateur le plus direct du déséquilibre radiatif de la Terre.',
@@ -44,8 +46,10 @@ export const ARGO_OHC_700M_METADATA: DatasetMetadata = {
   frequency: 'annual',
   startDate: '1955',
   endDate: '2025',
+  lastObservationDate: '2025',
   baselinePeriod: '1981-2010',
-  retrievedAt: '2025-01-15T00:00:00Z',
+  publicationDate: '2026-01-15',
+  retrievedAt: '2026-01-15T00:00:00Z',
   license: 'Domaine public gouvernemental des États-Unis',
   description:
     'Mesure de la couche supérieure océanique (0-700 m) sensible aux interactions atmosphériques directes et aux oscillations de type ENSO.',

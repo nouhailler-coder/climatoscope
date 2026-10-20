@@ -67,12 +67,20 @@ export const SolarPage: React.FC = () => {
       {/* Graphique 2: Activité solaire / Taches solaires */}
       {spots.dataset && (
         <div className="mt-8">
-          <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-sm font-mono uppercase tracking-wider text-slate-300 font-semibold flex items-center gap-2">
-              <Activity className="w-4 h-4 text-cyan-400" />
-              Graphique 2 — Nombre International de Taches Solaires (Sunspots SSN)
-            </h3>
-            <span className="text-xs text-slate-400 font-mono">Cycle de Schwabe ~11 ans</span>
+          <div className="mb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h3 className="text-sm font-mono uppercase tracking-wider text-slate-300 font-semibold flex items-center gap-2">
+                <Activity className="w-4 h-4 text-cyan-400" />
+                Graphique 2 — Nombre International de Taches Solaires (Sunspots SSN)
+              </h3>
+              <p className="text-[11px] text-slate-400 font-mono mt-0.5">
+                Série de référence historique WDC-SILSO (1880–2025) · Archive stable non actualisée en direct
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400 font-mono">Cycle de Schwabe ~11 ans</span>
+              <StatusBadge status={spots.status} onRefresh={spots.refresh} compact />
+            </div>
           </div>
           <TimeSeriesChart
             data={spots.dataset.data}

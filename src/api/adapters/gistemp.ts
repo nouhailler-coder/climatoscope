@@ -87,7 +87,22 @@ export class GistempProvider extends BaseDataProvider {
         }
       }
 
-      if (points.length > (isMonthly ? 200 : 50)) return points;
+      if (points.length > (isMonthly ? 200 : 50)) {
+        const sorted = points.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+        const lastPoint = sorted[sorted.length - 1];
+        if (isMonthly) {
+          GISTEMP_MONTHLY_METADATA.lastObservationDate = lastPoint.timestamp;
+          GISTEMP_MONTHLY_METADATA.endDate = lastPoint.timestamp;
+          GISTEMP_MONTHLY_METADATA.lastSuccessfulFetch = new Date().toISOString();
+          GISTEMP_MONTHLY_METADATA.retrievedAt = new Date().toISOString();
+        } else {
+          GISTEMP_METADATA.lastObservationDate = lastPoint.timestamp;
+          GISTEMP_METADATA.endDate = lastPoint.timestamp;
+          GISTEMP_METADATA.lastSuccessfulFetch = new Date().toISOString();
+          GISTEMP_METADATA.retrievedAt = new Date().toISOString();
+        }
+        return sorted;
+      }
       throw new Error('GISTEMP CSV données insuffisantes');
     } catch (err) {
       clearTimeout(timeoutId);
@@ -158,47 +173,70 @@ export class NoaaGlobalTempProvider extends BaseDataProvider {
   }
 
   async fetchData(options?: FetchOptions): Promise<TimeSeriesPoint[]> {
-    const url = 'https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/time-series/globe/land_ocean/12/12/1880-2025.json';
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const currentYear = new Date().getFullYear();
+    const startYear = options?.startDate ? parseInt(options.startDate.substring(0, 4), 10) : 1880;
+    const endYear = options?.endDate ? parseInt(options.endDate.substring(0, 4), 10) : currentYear;
 
-    try {
-      const response = await fetch(url, { signal: controller.signal });
-      clearTimeout(timeoutId);
-
-      if (!response.ok) throw new Error(`NOAA NCEI HTTP ${response.status}`);
-      const json = await response.json();
-      const dataObj = json?.data;
-
-      if (!dataObj || typeof dataObj !== 'object') {
-        throw new Error('Structure JSON NOAA NCEI inattendue');
-      }
-
-      const points: TimeSeriesPoint[] = [];
-      for (const [key, entry] of Object.entries(dataObj)) {
-        // key is YYYY12
-        const year = key.substring(0, 4);
-        const val = typeof entry === 'object' && entry !== null && 'value' in entry
-          ? parseFloat((entry as any).value)
-          : parseFloat(entry as any);
-
-        if (/^\d{4}$/.test(year) && !isNaN(val)) {
-          points.push({
-            timestamp: year,
-            value: Number(val.toFixed(2)),
-            qualityFlag: 'valid',
-          });
-        }
-      }
-
-      if (points.length > 50) {
-        return points.sort((a, b) => parseInt(a.timestamp, 10) - parseInt(b.timestamp, 10));
-      }
-      throw new Error('Données NOAA insuffisantes');
-    } catch (err) {
-      clearTimeout(timeoutId);
-      throw new Error(`Échec du téléchargement NOAA GlobalTemp: ${(err as Error).message}`);
+    // Build candidate years dynamically: try endYear (current year), and if not yet finalized by NOAA, fall back to previous years
+    const candidateYears: number[] = [endYear];
+    if (endYear >= currentYear) {
+      if (!candidateYears.includes(currentYear)) candidateYears.push(currentYear);
+      if (!candidateYears.includes(currentYear - 1)) candidateYears.push(currentYear - 1);
+      if (!candidateYears.includes(currentYear - 2)) candidateYears.push(currentYear - 2);
     }
+
+    let lastError: Error | null = null;
+
+    for (const yearTarget of candidateYears) {
+      const url = `https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/time-series/globe/land_ocean/12/12/${startYear}-${yearTarget}.json`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+      try {
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) throw new Error(`NOAA NCEI HTTP ${response.status}`);
+        const json = await response.json();
+        const dataObj = json?.data;
+
+        if (!dataObj || typeof dataObj !== 'object') {
+          throw new Error('Structure JSON NOAA NCEI inattendue');
+        }
+
+        const points: TimeSeriesPoint[] = [];
+        for (const [key, entry] of Object.entries(dataObj)) {
+          // key is YYYY12 or YYYYMM
+          const year = key.substring(0, 4);
+          const val = typeof entry === 'object' && entry !== null && 'value' in entry
+            ? parseFloat((entry as any).value)
+            : parseFloat(entry as any);
+
+          if (/^\d{4}$/.test(year) && !isNaN(val)) {
+            points.push({
+              timestamp: year,
+              value: Number(val.toFixed(2)),
+              qualityFlag: 'valid',
+            });
+          }
+        }
+
+        if (points.length > 50) {
+          const sorted = points.sort((a, b) => parseInt(a.timestamp, 10) - parseInt(b.timestamp, 10));
+          const lastPoint = sorted[sorted.length - 1];
+          NOAA_TEMPANOMALY_METADATA.lastObservationDate = lastPoint.timestamp;
+          NOAA_TEMPANOMALY_METADATA.endDate = lastPoint.timestamp;
+          NOAA_TEMPANOMALY_METADATA.lastSuccessfulFetch = new Date().toISOString();
+          NOAA_TEMPANOMALY_METADATA.retrievedAt = new Date().toISOString();
+          return sorted;
+        }
+      } catch (err) {
+        clearTimeout(timeoutId);
+        lastError = err as Error;
+      }
+    }
+
+    throw new Error(`Échec du téléchargement NOAA GlobalTemp: ${lastError?.message || 'Erreur réseau'}`);
   }
 
   getBaselineData(): TimeSeriesPoint[] {
@@ -253,7 +291,15 @@ export class BerkeleyEarthProvider extends BaseDataProvider {
         }
       }
 
-      if (points.length > 50) return points;
+      if (points.length > 50) {
+        const sorted = points.sort((a, b) => parseInt(a.timestamp, 10) - parseInt(b.timestamp, 10));
+        const lastPoint = sorted[sorted.length - 1];
+        BERKELEY_TEMP_METADATA.lastObservationDate = lastPoint.timestamp;
+        BERKELEY_TEMP_METADATA.endDate = lastPoint.timestamp;
+        BERKELEY_TEMP_METADATA.lastSuccessfulFetch = new Date().toISOString();
+        BERKELEY_TEMP_METADATA.retrievedAt = new Date().toISOString();
+        return sorted;
+      }
       throw new Error('Berkeley Earth données insuffisantes');
     } catch (err) {
       clearTimeout(timeoutId);

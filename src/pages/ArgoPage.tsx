@@ -68,14 +68,21 @@ export const ArgoPage: React.FC = () => {
 
       {/* Layer Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/60 border border-slate-800 p-3.5 rounded-xl">
-        <span className="text-xs font-mono text-slate-300 flex items-center gap-1.5">
-          <Layers className="w-4 h-4 text-blue-400" />
-          Sélectionner la couche bathymétrique :
-        </span>
+        <div>
+          <span className="text-xs font-mono text-slate-300 flex items-center gap-1.5">
+            <Layers className="w-4 h-4 text-blue-400" />
+            Sélectionner la couche bathymétrique :
+          </span>
+          <span className="text-[11px] text-slate-400 font-mono mt-0.5 block">
+            {depthLayer === '2000m'
+              ? 'Flux dynamique in situ (Réseau mondial Argo & NOAA NCEI 0-2000m, 1955–2025)'
+              : 'Série historique de référence embarquée (NOAA NCEI bathythermographes 0-700m, 1955–2024)'}
+          </span>
+        </div>
         <div className="inline-flex rounded-lg bg-slate-950 p-1 border border-slate-800 text-xs">
           {[
-            { id: '2000m' as const, label: '0 – 2 000 mètres (Océan Global)', desc: 'Indicateur maître de stockage' },
-            { id: '700m' as const, label: '0 – 700 mètres (Océan Supérieur)', desc: 'Couche couplée atmosphérique' },
+            { id: '2000m' as const, label: '0 – 2 000 m (Flux direct)', desc: 'Indicateur maître de stockage' },
+            { id: '700m' as const, label: '0 – 700 m (Archive historique)', desc: 'Couche couplée atmosphérique' },
           ].map((item) => (
             <button
               key={item.id}

@@ -250,6 +250,25 @@ describe('Baseline Datasets & Scientific Formatters', () => {
     expect(parsed[0].value).toBe(7.05);
     expect(parsed[3].timestamp).toBe('2025');
     expect(parsed[3].value).toBe(4.3);
+
+    // Test multi-month preservation without timestamp collision
+    const multiMonthCsv = `year, mo, data-type, region, extent, area
+2024, 01, Goddard, N, 13.13, 11.50
+2024, 02, Goddard, N, 14.61, 12.80
+2024, 03, Goddard, N, 14.92, 13.00
+2024, 09, Goddard, N,  4.28,  2.70`;
+    const parsedMonthly = parseNsidcMonthlyCsv(multiMonthCsv);
+    expect(parsedMonthly.length).toBe(4);
+    expect(parsedMonthly[0].timestamp).toBe('2024-01');
+    expect(parsedMonthly[1].timestamp).toBe('2024-02');
+    expect(parsedMonthly[2].timestamp).toBe('2024-03');
+    expect(parsedMonthly[3].timestamp).toBe('2024-09');
+
+    // Test explicit annual aggregation when format is 'year'
+    const parsedAggregated = parseNsidcMonthlyCsv(multiMonthCsv, { timestampFormat: 'year' });
+    expect(parsedAggregated.length).toBe(1);
+    expect(parsedAggregated[0].timestamp).toBe('2024');
+    expect(parsedAggregated[0].value).toBeCloseTo((13.13 + 14.61 + 14.92 + 4.28) / 4, 2);
   });
 
   it('loads Copernicus ERA5 & GISS Zonal Temperature Anomalies demonstrating Arctic Amplification', () => {

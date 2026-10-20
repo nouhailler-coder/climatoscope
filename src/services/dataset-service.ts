@@ -416,7 +416,7 @@ class DatasetService {
         metadata,
         data: points,
         // Authentic reference date, never confused with the present timestamp
-        lastUpdated: metadata.retrievedAt || metadata.endDate || '2025-01-15T00:00:00Z',
+        lastUpdated: metadata.retrievedAt || metadata.endDate || '2026-01-15T00:00:00Z',
         localCacheVersion: 1,
       };
 
@@ -424,8 +424,15 @@ class DatasetService {
       return { dataset: fallbackDataset, status: 'embedded_historical' };
     }
 
-    // Enrich metadata with latest observation date and calculation method
+    // Enrich metadata with latest observation date, provenance and calculation method
     metadata = this.enrichMetadata(metadata, datasetId, points);
+    if (status === 'live') {
+      metadata.lastSuccessfulFetch = new Date().toISOString();
+      metadata.retrievedAt = new Date().toISOString();
+    } else if (status === 'embedded_historical') {
+      metadata.provenanceType = 'embedded_historical';
+      metadata.lastSuccessfulFetch = undefined;
+    }
 
     const internalDataset: InternalDataset = {
       metadata,
