@@ -22,6 +22,8 @@ import {
   ArrowRight,
   ExternalLink,
 } from 'lucide-react';
+import { ContextualBanner } from '../components/common/ContextualBanner';
+import { HelpTooltip } from '../components/common/HelpTooltip';
 
 type GhgTab = 'co2' | 'ch4' | 'n2o' | 'aggi' | 'summary';
 
@@ -216,6 +218,17 @@ export const Co2Page: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Contextual Onboarding Banner */}
+      <ContextualBanner
+        screenId="co2"
+        title="Gaz à Effet de Serre à Longue Durée de Vie (CO₂, CH₄, N₂O)"
+        summary="Mesures de précision des concentrations atmosphériques globales et forçage radiatif cumulé (Indice AGGI NOAA)."
+        sourceOrg="NOAA Global Monitoring Laboratory (GML) & Scripps Institution"
+        methodologyNote="Spectrométrie infrarouge NDIR à l'observatoire de Mauna Loa et réseau de flacons de la couche limite marine mondiale."
+        keyTakeaway="Le forçage radiatif direct des gaz à effet de serre a augmenté de plus de 50% depuis 1990 (AGGI > 1.50). Le CO₂ reste le contributeur prédominant (66%), suivi par le méthane CH₄ (16%)."
+        defaultOpen={true}
+      />
 
       {/* Gas Switcher Tabs */}
       <div className="flex border-b border-slate-800 gap-2 overflow-x-auto pb-1 text-xs font-medium">

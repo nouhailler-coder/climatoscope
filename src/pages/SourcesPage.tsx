@@ -3,6 +3,8 @@ import { datasetService } from '../services/dataset-service';
 import { dbService } from '../services/db';
 import { DatasetMetadata } from '../types/dataset';
 import { StatusBadge } from '../components/common/StatusBadge';
+import { ContextualBanner } from '../components/common/ContextualBanner';
+import { HelpTooltip } from '../components/common/HelpTooltip';
 import {
   BookOpen,
   ExternalLink,
@@ -68,7 +70,7 @@ export const SourcesPage: React.FC = () => {
   const countDerived = catalog.filter((m) => m.isDerived).length;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Title & Overview */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
@@ -77,8 +79,12 @@ export const SourcesPage: React.FC = () => {
               <BookOpen className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                Registre des Sources & Traçabilité Scientifique
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                <span>Registre des Sources & Traçabilité Scientifique</span>
+                <HelpTooltip
+                  title="Traçabilité de bout en bout"
+                  content="Chaque série dispose d'une fiche d'identité complète : organisme émetteur, protocole d'acquisition, licence open-data, statut de provenance (flux en direct, historique embarqué ou dérivé)."
+                />
               </h2>
               <p className="text-xs text-slate-400 font-mono">
                 Inventaire officiel des séries, protocoles d'actualisation et méthodes de dérivation
@@ -103,6 +109,17 @@ export const SourcesPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Contextual Onboarding Banner */}
+      <ContextualBanner
+        screenId="sources_catalog"
+        title="Architecture de provenance, Open Data & Intégrité scientifique"
+        summary="ClimatOSCOPE garantit l'origine et l'intégrité de chaque observation. Toutes les métadonnées sont traçables jusqu'aux fichiers sources des agences de recherche mondiales."
+        sourceOrg="NASA, NOAA, Berkeley Earth, LASP, SILSO, NSIDC, ECMWF"
+        methodologyNote="Distinction claire entre les séries à flux direct (live_feed), les séries historiques vérifiées embarquées hors-ligne (embedded_historical) et les séries dérivées analytiquement (isDerived). Stockage local haute fidélité via IndexedDB."
+        keyTakeaway="Toutes les données sont issues du domaine public ou de licences Creative Commons. L'application ne modifie jamais les valeurs brutes émanant des organismes officiels."
+        defaultOpen={true}
+      />
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-slate-900/60 border border-slate-800 p-3 rounded-2xl">

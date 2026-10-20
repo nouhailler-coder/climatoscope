@@ -1,9 +1,11 @@
 import React from 'react';
 import { HelpCircle, CloudRain, Thermometer, TrendingUp, AlertTriangle, Atom, Eye, ShieldCheck } from 'lucide-react';
+import { ContextualBanner } from '../components/common/ContextualBanner';
+import { HelpTooltip } from '../components/common/HelpTooltip';
 
 export const HowToReadPage: React.FC = () => {
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
+    <div className="space-y-6 max-w-4xl mx-auto">
       {/* Title */}
       <div className="pb-4 border-b border-slate-800">
         <div className="flex items-center gap-2.5">
@@ -11,8 +13,12 @@ export const HowToReadPage: React.FC = () => {
             <HelpCircle className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-              Comment lire les données climatiques ?
+            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+              <span>Comment lire les données climatiques ?</span>
+              <HelpTooltip
+                title="Épistémologie des Mesures"
+                content="Guide méthodologique pour interpréter correctement les séries chronologiques scientifiques : distinction météorologie vs climat, rôle des anomalies thermiques, et garde-fous statistiques contre les fausses corrélations."
+              />
             </h2>
             <p className="text-xs text-slate-400 font-mono">
               Guide pédagogique d'épistémologie et de physique pour une lecture éclairée
@@ -20,6 +26,17 @@ export const HowToReadPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Contextual Onboarding Banner */}
+      <ContextualBanner
+        screenId="how_to_read"
+        title="Repères épistémologiques & Principes physiques fondamentaux"
+        summary="Une observation scientifique ne prend son sens que dans son cadre d'analyse : échelle de temps de 30 ans, anomalies par rapport à une climatologie stable et distinction entre corrélation et causalité."
+        sourceOrg="Organisation Météorologique Mondiale (OMM) & GIEC (IPCC AR6 WG1)"
+        methodologyNote="Application rigoureuse de la méthode scientifique : conservation de l'énergie (bilan radiatif au TOA), spectroscopie d'absorption infrarouge des gaz polyatomiques et débruitage par moyennes mobiles."
+        keyTakeaway="Une corrélation mathématique (même avec r > 0.90) ne prouve aucun lien de cause à effet en l'absence d'un mécanisme physique démontré par les lois de la thermodynamique."
+        defaultOpen={true}
+      />
 
       {/* Grid of Concept Cards */}
       <div className="space-y-6 text-sm text-slate-300">

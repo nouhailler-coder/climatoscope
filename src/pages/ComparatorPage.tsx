@@ -4,6 +4,8 @@ import { ScatterPlotChart } from '../components/charts/ScatterPlotChart';
 import { useDataset } from '../hooks/useDataset';
 import { exportMultiSeriesToCSV } from '../utils/export';
 import { Scale, Info, Layers, Sliders, Download, ScatterChart as ScatterIcon } from 'lucide-react';
+import { ContextualBanner } from '../components/common/ContextualBanner';
+import { HelpTooltip } from '../components/common/HelpTooltip';
 
 export const ComparatorPage: React.FC = () => {
   const tsi = useDataset('solar-tsi-lisird');
@@ -430,6 +432,17 @@ export const ComparatorPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Contextual Onboarding Banner */}
+      <ContextualBanner
+        screenId="comparator"
+        title="Comparateur Multi-Séries & Analyse Bivariée"
+        summary="Superposez jusqu'à 14 variables physiques sur une même échelle temporelle pour tester visuellement et statistiquement leurs relations."
+        sourceOrg="Ensemble des agences scientifiques (NASA, NOAA, SILSO, NSIDC, ECMWF)"
+        methodologyNote="Normalisation mathématique en Z-score (centré-réduit) ou Indice 100 pour éliminer les disparités d'unités."
+        keyTakeaway="Rappel fondamental : Une forte corrélation statistique (Pearson r proche de 1) est une condition nécessaire mais JAMAIS suffisante pour conclure à un lien de causalité."
+        defaultOpen={true}
+      />
 
       {/* Explanatory Context */}
       <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-xs text-slate-300 leading-relaxed flex items-start gap-3">

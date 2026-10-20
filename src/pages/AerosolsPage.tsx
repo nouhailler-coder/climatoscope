@@ -23,6 +23,8 @@ import {
 } from 'recharts';
 import { QualityBadge } from '../components/common/QualityBadge';
 import { StatusBadge } from '../components/common/StatusBadge';
+import { ContextualBanner } from '../components/common/ContextualBanner';
+import { HelpTooltip } from '../components/common/HelpTooltip';
 import { useDataset } from '../hooks/useDataset';
 import { AEROSOLS_ANNUAL_DATA } from '../data/baseline/aerosols-cams-aeronet';
 import { exportToCsv, exportToJson } from '../utils/export';
@@ -97,8 +99,12 @@ export const AerosolsPage: React.FC = () => {
               <Cloud className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                Module ☁️ Aérosols Troposphériques & Qualité de l'Air
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                <span>Module ☁️ Aérosols Troposphériques & Qualité de l'Air</span>
+                <HelpTooltip
+                  title="Aérosols & Effet Parasol"
+                  content="Les particules en suspension (sulfates, suies, poussières) réfléchissent le rayonnement solaire (effet direct) et modifient la réflectance des nuages (effet indirect Twomey), masquant une part substantielle de l'effet de serre."
+                />
               </h2>
               <p className="text-xs text-slate-400 font-mono">
                 Copernicus CAMS & AERONET (2000–2024) · Spéciation chimique & Effet "Parasol" (Twomey)
@@ -113,19 +119,32 @@ export const AerosolsPage: React.FC = () => {
           <div className="inline-flex rounded-lg bg-slate-900 border border-slate-800 p-0.5">
             <button
               onClick={() => handleExport('csv')}
-              className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition"
+              className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition cursor-pointer"
+              title="Exporter les données aérosols en CSV"
             >
               <Download className="w-3.5 h-3.5" /> CSV
             </button>
             <button
               onClick={() => handleExport('json')}
-              className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition"
+              className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition cursor-pointer"
+              title="Exporter les données aérosols en JSON"
             >
               JSON
             </button>
           </div>
         </div>
       </div>
+
+      {/* Contextual Onboarding Banner */}
+      <ContextualBanner
+        screenId="aerosols_cams"
+        title="Aérosols troposphériques, spéciation chimique & Paradoxe de la dépollution"
+        summary="Les aérosols anthropiques (notamment les sulfates issus de la combustion du charbon et du fioul lourd) ont exercé un puissant effet refroidissant masquant une fraction du réchauffement causé par les gaz à effet de serre."
+        sourceOrg="Copernicus CAMS & Réseau mondial de photomètres AERONET"
+        methodologyNote="Épaisseur optique des aérosols (AOD) à 550 nm décomposée par espèce (sulfates, carbone suie, matière organique, poussières minérales, sel marin). Forçage radiatif net estimé à environ -1.1 W/m²."
+        keyTakeaway="Le paradoxe de la dépollution (notamment la norme maritime OMI 2020 limitant le soufre des carburants à 0.5%) élimine le masque d'aérosols protecteur, provoquant un 'démasquage' thermique rapide du forçage de serre sous-jacent."
+        defaultOpen={true}
+      />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

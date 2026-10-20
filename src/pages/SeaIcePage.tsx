@@ -47,6 +47,8 @@ import {
   Calculator,
   Calendar,
 } from 'lucide-react';
+import { ContextualBanner } from '../components/common/ContextualBanner';
+import { HelpTooltip } from '../components/common/HelpTooltip';
 
 type IceViewMode = 'arctic-september' | 'antarctic-february' | 'seasonal-cycle' | 'both-poles';
 
@@ -283,6 +285,17 @@ export const SeaIcePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Contextual Onboarding Banner */}
+      <ContextualBanner
+        screenId="seaice"
+        title="Cryosphère Polaire & Rétroaction de l'Albédo"
+        summary="Suivi par satellite micro-ondes de l'étendue des glaces de mer polaires (Arctique en septembre et Antarctique en février) depuis 1979."
+        sourceOrg="National Snow and Ice Data Center (NSIDC Sea Ice Index v3) & NASA GSFC"
+        methodologyNote="Radiomètres micro-ondes passifs (SMMR, SSM/I, SSMIS) détectant la surface couverte par au moins 15% de glace de mer."
+        keyTakeaway="La fonte estivale arctique (-12,2% par décennie) remplace une surface blanche réfléchissante (albédo ~0,70) par un océan sombre absorbant (albédo ~0,06), amplifiant le réchauffement polaire (rétroaction positive)."
+        defaultOpen={true}
+      />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

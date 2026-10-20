@@ -13,6 +13,8 @@ import {
 } from 'recharts';
 import { QualityBadge } from '../components/common/QualityBadge';
 import { StatusBadge } from '../components/common/StatusBadge';
+import { ContextualBanner } from '../components/common/ContextualBanner';
+import { HelpTooltip } from '../components/common/HelpTooltip';
 import { MAJOR_ERUPTIONS, VolcanicEruption } from '../data/baseline/volcano-saod';
 import { useDataset } from '../hooks/useDataset';
 import { exportDatasetToCSV, exportDatasetToJSON } from '../utils/export';
@@ -243,8 +245,12 @@ export const VolcanoPage: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight font-sans">
-                  Module 🌋 Volcanisme & Forçage Aérosol Stratosphérique
+                <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight font-sans flex items-center gap-2">
+                  <span>Module 🌋 Volcanisme & Forçage Aérosol Stratosphérique</span>
+                  <HelpTooltip
+                    title="Aérosols Volcaniques Stratosphériques"
+                    content="Les éruptions explosives injectent du dioxyde de soufre (SO₂) dans la stratosphère, formant des gouttelettes d'acide sulfurique (H₂SO₄) qui réfléchissent le rayonnement solaire et refroidissent temporairement la surface."
+                  />
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-orange-950 text-orange-300 border border-orange-800">
                   V0.4
@@ -282,6 +288,17 @@ export const VolcanoPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Contextual Onboarding Banner */}
+      <ContextualBanner
+        screenId="volcano_saod"
+        title="Forçage radiatif volcanique & Épaisseur optique SAOD"
+        summary="Les grandes éruptions explosives (VEI ≥ 5) projettent des millions de tonnes de dioxyde de soufre (SO₂) au-delà de la tropopause, créant un voile réflecteur d'aérosols sulfatés qui persiste 1 à 3 ans."
+        sourceOrg="NASA GISS (Sato et al.) & Smithsonian Institution Global Volcanism Program"
+        methodologyNote="Épaisseur optique des aérosols stratosphériques à 550 nm (SAOD). Relation empirique du forçage radiatif : ΔF_volcan ≈ -21 × SAOD (W/m²), induisant une baisse transitoire des températures de surface."
+        keyTakeaway="Contrairement aux gaz à effet de serre persistants (CO₂ : siècles à millénaires), le forçage volcanique est un forçage pulsé et transitoire : les aérosols retombent par sédimentation et lessivage en 2 ans environ."
+        defaultOpen={true}
+      />
 
       {/* Main Educational Context Banner */}
       <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 text-xs text-slate-300 leading-relaxed shadow-lg">

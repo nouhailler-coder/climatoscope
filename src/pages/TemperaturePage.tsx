@@ -16,6 +16,8 @@ import {
 } from 'recharts';
 import { calculatePearsonCorrelation, calculateLinearTrend } from '../analysis/math';
 import { Thermometer, Info, Layers, Scale, ExternalLink, Calendar, Calculator, CheckCircle2 } from 'lucide-react';
+import { ContextualBanner } from '../components/common/ContextualBanner';
+import { HelpTooltip } from '../components/common/HelpTooltip';
 
 type TempSource = 'temp-nasa-gistemp' | 'temp-nasa-gistemp-monthly' | 'temp-noaa-globaltemp' | 'temp-berkeley-earth' | 'compare-all';
 
@@ -122,11 +124,26 @@ export const TemperaturePage: React.FC = () => {
         </div>
       </div>
 
+      {/* Contextual Onboarding Banner */}
+      <ContextualBanner
+        screenId="temperature"
+        title="Reconstructions Globales de Surface (Terre-Océan)"
+        summary="Suivi de l'anomalie de température moyenne à la surface du globe depuis 1880, calculée par la NASA, la NOAA et Berkeley Earth."
+        sourceOrg="NASA GISS GISTEMP v4, NOAA NCEI GlobalTemp & Berkeley Earth"
+        methodologyNote="Combinaison des stations terrestres (GHCN v4) et des mesures océaniques par bouées et navires (ERSST v5 / Argo)."
+        keyTakeaway="Les 3 instituts indépendants utilisent des méthodes de spatialisation distinctes mais aboutissent à un accord statistique quasi parfait (r > 0,98) confirmant un réchauffement planétaire de +1,2°C à +1,3°C."
+        defaultOpen={true}
+      />
+
       {/* Dataset / Provider switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/60 border border-slate-800 p-3.5 rounded-xl">
         <span className="text-xs font-mono text-slate-300 flex items-center gap-1.5">
           <Layers className="w-4 h-4 text-rose-400" />
-          Sélectionner le mode d'observation :
+          <span>Sélectionner le mode d'observation :</span>
+          <HelpTooltip
+            title="Séries indépendantes"
+            content="GISTEMP v4 utilise une pondération spatiale à 250 km. NOAA NCEI applique un maillage 5°x5°. Berkeley Earth utilise un kriging géostatistique sur plus de 30 000 stations."
+          />
         </span>
         <div className="inline-flex flex-wrap rounded-lg bg-slate-950 p-1 border border-slate-800 text-xs">
           {[

@@ -19,6 +19,8 @@ import {
 } from 'recharts';
 import { QualityBadge } from '../components/common/QualityBadge';
 import { StatusBadge } from '../components/common/StatusBadge';
+import { ContextualBanner } from '../components/common/ContextualBanner';
+import { HelpTooltip } from '../components/common/HelpTooltip';
 import { useDataset } from '../hooks/useDataset';
 import { ZONAL_ANNUAL_DATA } from '../data/baseline/zonal-era5-polar';
 import { exportToCsv, exportToJson } from '../utils/export';
@@ -84,8 +86,12 @@ export const ZonalPage: React.FC = () => {
               <Globe className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                Module 🌎 Réanalyses ERA5 & Amplification Polaire
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                <span>Module 🌎 Réanalyses ERA5 & Amplification Polaire</span>
+                <HelpTooltip
+                  title="Amplification Arctique"
+                  content="Ce module décompose les anomalies thermiques par bandes de latitude pour observer pourquoi les hautes latitudes polaires se réchauffent 3 à 4 fois plus vite que les tropiques."
+                />
               </h2>
               <p className="text-xs text-slate-400 font-mono">
                 Anomalies thermiques décomposées par bandes de latitude (Copernicus ERA5 & NASA GISS)
@@ -100,13 +106,15 @@ export const ZonalPage: React.FC = () => {
           <div className="inline-flex rounded-lg bg-slate-900 border border-slate-800 p-0.5">
             <button
               onClick={() => handleExport('csv')}
-              className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition"
+              className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition cursor-pointer"
+              title="Exporter les anomalies zonales en CSV"
             >
               <Download className="w-3.5 h-3.5" /> CSV
             </button>
             <button
               onClick={() => handleExport('json')}
-              className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition"
+              className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition cursor-pointer"
+              title="Exporter les anomalies zonales en JSON"
             >
               JSON
             </button>
@@ -114,10 +122,27 @@ export const ZonalPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Contextual Onboarding Banner */}
+      <ContextualBanner
+        screenId="zonal_era5"
+        title="Amplification polaire & distribution latitudinale"
+        summary="Les réanalyses météorologiques ERA5 et les séries NASA GISS mettent en évidence une asymétrie thermique marquée entre l'Arctique et les régions équatoriales."
+        sourceOrg="Copernicus ECMWF (ERA5) & NASA GISS"
+        methodologyNote="Anomalies annuelles calculées par rapport à la climatologie de référence 1951-1980 sur 5 bandes zonales (Arctique 90°N-64°N, Tempéré Nord 64°N-24°N, Tropiques 24°N-24°S, Tempéré Sud 24°S-64°S, Antarctique 64°S-90°S)."
+        keyTakeaway="La fonte de la banquise arctique réduit l'albédo de surface (de ~0.8 à ~0.07 pour l'océan ouvert), créant une rétroaction positive majeure qui amplifie le réchauffement polaire de 3 à 4 fois par rapport à la moyenne globale."
+        defaultOpen={true}
+      />
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
-          <span className="text-[11px] font-mono text-slate-400 block">Arctique (90°N–64°N, {latestRecord.year}) :</span>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono text-slate-400 block">Arctique (90°N–64°N, {latestRecord.year}) :</span>
+            <HelpTooltip
+              title="Bande Arctique"
+              content="Comprend le bassin océanique arctique, le Groenland et le nord de la Sibérie/Canada. C'est la zone du globe connaissant le réchauffement le plus rapide."
+            />
+          </div>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-2xl font-bold font-mono text-rose-400">+{latestRecord.arctic.toFixed(2)}</span>
             <span className="text-xs font-mono text-slate-400">°C</span>
@@ -128,7 +153,13 @@ export const ZonalPage: React.FC = () => {
         </div>
 
         <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
-          <span className="text-[11px] font-mono text-slate-400 block">Moyenne Globale ({latestRecord.year}) :</span>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono text-slate-400 block">Moyenne Globale ({latestRecord.year}) :</span>
+            <HelpTooltip
+              title="Moyenne Mondiale"
+              content="Moyenne spatiale pondérée par le cosinus de la latitude sur l'ensemble de la surface terrestre et océanique."
+            />
+          </div>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-2xl font-bold font-mono text-amber-300">+{latestRecord.global.toFixed(2)}</span>
             <span className="text-xs font-mono text-slate-400">°C</span>

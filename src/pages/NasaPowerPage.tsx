@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { TimeSeriesChart } from '../components/charts/TimeSeriesChart';
 import { QualityBadge } from '../components/common/QualityBadge';
 import { StatusBadge } from '../components/common/StatusBadge';
+import { ContextualBanner } from '../components/common/ContextualBanner';
+import { HelpTooltip } from '../components/common/HelpTooltip';
 import { WorldMapPicker } from '../components/power/WorldMapPicker';
 import { PRESET_LOCATIONS } from '../data/baseline/nasa-power-sample';
 import { useDataset } from '../hooks/useDataset';
@@ -64,7 +66,7 @@ export const NasaPowerPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Title & Overview */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
@@ -73,8 +75,12 @@ export const NasaPowerPage: React.FC = () => {
               <Radio className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                Module 4 — ☀️ NASA POWER (Rayonnement au Sol)
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                <span>Module 4 — ☀️ NASA POWER (Rayonnement au Sol)</span>
+                <HelpTooltip
+                  title="Rayonnement Solaire au Sol"
+                  content="Paramètre ALLSKY_SFC_SW_DWN : flux radiatif solaire incident descendant intégrant la nébulosité réelle mesuré par satellite, en kWh/m²/jour. Permet d'explorer l'énergie reçue au sol n'importe où sur le globe."
+                />
               </h2>
               <p className="text-xs text-slate-400 font-mono">
                 Prediction Of Worldwide Energy Resources — NASA Langley Research Center
@@ -108,6 +114,17 @@ export const NasaPowerPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Contextual Onboarding Banner */}
+      <ContextualBanner
+        screenId="nasa_power"
+        title="Rayonnement solaire incident au sol & Climatologie locale"
+        summary="Le programme NASA POWER fournit des données de rayonnement solaire descendant issues de réanalyses satellite mondiales à résolution 0.5° × 0.5°."
+        sourceOrg="NASA Langley Research Center (POWER Project)"
+        methodologyNote="Intégration journalière et mensuelle du flux à ciel variable (ALLSKY_SFC_SW_DWN) en kWh/m²/jour, combinant données satellitaires GEWEX/SRB, CERES et assimilation météorologique MERRA-2."
+        keyTakeaway="Ce module illustre la différence fondamentale entre l'irradiance au sommet de l'atmosphère (TSI ~1361 W/m²) et le flux effectif absorbé au sol, modulé par l'épaisseur optique atmosphérique, les nuages et la latitude."
+        defaultOpen={true}
+      />
 
       {/* Interactive World Map Picker */}
       <WorldMapPicker

@@ -4,6 +4,7 @@ import { QualityBadge } from '../components/common/QualityBadge';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { useDataset } from '../hooks/useDataset';
 import { Sun, Activity, Info, ExternalLink } from 'lucide-react';
+import { ContextualBanner } from '../components/common/ContextualBanner';
 
 export const SolarPage: React.FC = () => {
   const tsi = useDataset('solar-tsi-lisird');
@@ -35,14 +36,16 @@ export const SolarPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Explanatory Context */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-xs text-slate-300 leading-relaxed flex items-start gap-3">
-        <Info className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-        <div>
-          L’<strong>Irradiance Solaire Totale (TSI)</strong> représente la puissance électromagnétique émise par le Soleil reçue par unité de surface au sommet de l’atmosphère terrestre (à une distance moyenne de 1 UA, soit 149,6 millions de km).
-          Mesurée depuis 1978 par radiomètres spatiaux (ERB, ACRIM, SORCE/TIM, TSIS-1), sa valeur moyenne est de <strong className="text-amber-300">~1361 W/m²</strong> et oscille d'environ <strong>1 W/m² (0,07%)</strong> selon le cycle magnétique de 11 ans (cycle de Schwabe).
-        </div>
-      </div>
+      {/* Contextual Onboarding Banner */}
+      <ContextualBanner
+        screenId="solar"
+        title="Activité & Cycles Magnétiques Solaires"
+        summary="Suivi continu de l'irradiance solaire totale (TSI en W/m²) et du nombre international de taches solaires (SSN)."
+        sourceOrg="NASA / LASP LISIRD (SORCE, TSIS-1 TIM) & WDC-SILSO Observatoire Royal de Belgique"
+        methodologyNote="Mesure radiométrique absolue spatiale au sommet de l'atmosphère étalonnée sur les instruments TIM et observations optiques télescopiques."
+        keyTakeaway="Depuis 1960, l'activité solaire globale montre une légère tendance baissière tandis que les températures mondiales augmentent fortement, démontrant un découplage physique majeur."
+        defaultOpen={true}
+      />
 
       {/* Graphique 1: TSI dans le temps */}
       {tsi.dataset && (

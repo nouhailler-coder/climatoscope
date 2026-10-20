@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { TimeSeriesChart } from '../components/charts/TimeSeriesChart';
 import { QualityBadge } from '../components/common/QualityBadge';
 import { StatusBadge } from '../components/common/StatusBadge';
+import { ContextualBanner } from '../components/common/ContextualBanner';
+import { HelpTooltip } from '../components/common/HelpTooltip';
 import { useDataset } from '../hooks/useDataset';
 import { exportDatasetToCSV, exportDatasetToJSON } from '../utils/export';
 import { Waves, Info, Download, ShieldCheck, Layers } from 'lucide-react';
@@ -21,7 +23,7 @@ export const ArgoPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Title & Overview */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
@@ -30,8 +32,12 @@ export const ArgoPage: React.FC = () => {
               <Waves className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                Module 🌊 Océans — Contenu Thermique (Argo / NOAA)
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                <span>Module 🌊 Océans — Contenu Thermique (Argo / NOAA)</span>
+                <HelpTooltip
+                  title="Contenu Thermique Océanique"
+                  content="Exprimé en Zettajoules (1 ZJ = 10²¹ Joules). L'océan absorbe plus de 90% de l'excédent thermique planétaire, ce qui en fait le réservoir calorifique dominant du système Terre."
+                />
               </h2>
               <p className="text-xs text-slate-400 font-mono">
                 Ocean Heat Content (OHC) — Programme International Argo & NOAA NCEI
@@ -65,6 +71,17 @@ export const ArgoPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Contextual Onboarding Banner */}
+      <ContextualBanner
+        screenId="argo_ocean"
+        title="Contenu thermique océanique (OHC) & Flotteurs Argo"
+        summary="Le réseau international de près de 4 000 flotteurs autonomes Argo plongeant jusqu'à 2 000 mètres de profondeur mesure en temps réel la température et la salinité des masses d'eau mondiales."
+        sourceOrg="NOAA NCEI & Réseau International Argo"
+        methodologyNote="Intégration calorifique volumique globale Q = ∭ ρ·Cp·ΔT·dV sur les couches 0–2 000 m (mesures autonomes modernes) et 0–700 m (reconstruction bathythermographe XBT depuis 1955), exprimée en Zettajoules relative à la moyenne 1981–2010."
+        keyTakeaway="L'eau possédant une inertie thermique immense, l'accumulation de plus de 450 Zettajoules depuis les années 1960 démontre un déséquilibre radiatif persistant de la Terre d'environ ~0.8 W/m²."
+        defaultOpen={true}
+      />
 
       {/* Layer Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/60 border border-slate-800 p-3.5 rounded-xl">

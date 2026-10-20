@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { TimeSeriesChart } from '../components/charts/TimeSeriesChart';
 import { QualityBadge } from '../components/common/QualityBadge';
 import { StatusBadge } from '../components/common/StatusBadge';
+import { ContextualBanner } from '../components/common/ContextualBanner';
+import { HelpTooltip } from '../components/common/HelpTooltip';
 import { useDataset } from '../hooks/useDataset';
 import { exportDatasetToCSV, exportDatasetToJSON } from '../utils/export';
 import { Globe, ArrowDown, ArrowUp, Info, Download, ShieldCheck, Layers, Sun } from 'lucide-react';
@@ -35,7 +37,7 @@ export const CeresPage: React.FC = () => {
   const latestAlbedo = ceresAlbedo.dataset?.data[ceresAlbedo.dataset.data.length - 1];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Title & Overview */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
@@ -44,8 +46,12 @@ export const CeresPage: React.FC = () => {
               <Globe className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                Module 🌍 CERES — Bilan Énergétique au Sommet de l’Atmosphère
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                <span>Module 🌍 CERES — Bilan Énergétique au Sommet de l’Atmosphère</span>
+                <HelpTooltip
+                  title="Bilan Radiatif TOA"
+                  content="Clouds and the Earth's Radiant Energy System (CERES). Mesure directement le déséquilibre énergétique net (EEI) entre le flux solaire entrant et les flux sortants (réflexion et infrarouge thermique)."
+                />
               </h2>
               <p className="text-xs text-slate-400 font-mono">
                 Clouds and the Earth’s Radiant Energy System — NASA Langley Research Center
@@ -79,6 +85,17 @@ export const CeresPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Contextual Onboarding Banner */}
+      <ContextualBanner
+        screenId="ceres_radiation"
+        title="Bilan radiatif au sommet de l'atmosphère (TOA) & NASA CERES"
+        summary="Les radiomètres spatiaux CERES (Terra, Aqua, Suomi-NPP) quantifient le déséquilibre énergétique fondamental de la planète : l'énergie qui entre moins celle qui sort."
+        sourceOrg="NASA Langley Research Center (CERES EBAF Ed4.2)"
+        methodologyNote="Calcul direct du flux net au sommet de l'atmosphère : Net = SW_in (340.4 W/m²) - [SW_out (Albédo ~98.5 W/m²) + LW_out (Rayonnement OLR ~240.5 W/m²)]. Un flux net positif signifie que la planète accumule de la chaleur."
+        keyTakeaway="Le déséquilibre net planétaire mesuré est passé de +0.6 W/m² (années 2000) à plus de +1.1 W/m² dans les années 2020, confirmant l'accélération de l'accumulation calorifique dans le système climatique."
+        defaultOpen={true}
+      />
 
       {/* TOA Energy Flow Diagram Card */}
       <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl">

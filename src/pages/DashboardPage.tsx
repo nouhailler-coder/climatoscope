@@ -21,6 +21,8 @@ import {
   Compass,
   Cloud,
 } from 'lucide-react';
+import { ContextualBanner } from '../components/common/ContextualBanner';
+import { HelpTooltip } from '../components/common/HelpTooltip';
 
 interface DashboardPageProps {
   onNavigate: (tab: NavTab) => void;
@@ -144,6 +146,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         <div className="absolute -right-12 -bottom-12 w-64 h-64 rounded-full bg-cyan-500/5 blur-3xl pointer-events-none" />
       </div>
 
+      {/* Contextual Onboarding Banner */}
+      <ContextualBanner
+        screenId="dashboard"
+        title="Observatoire Multi-Paramétrique des Données Ouvertes"
+        summary="Vue synthétique des 10 variables physiques fondamentales du système Terre issues des satellites et stations in situ."
+        sourceOrg="NASA, NOAA, Berkeley Earth, LASP, SILSO, NSIDC & Copernicus"
+        methodologyNote="Flux directs automatisés avec cache local IndexedDB et horodatage scientifique vérifié."
+        keyTakeaway="Les mesures satellitaires et in situ révèlent une accumulation continue d'énergie dans le système climatique (90% dans les océans), corrélée à la hausse des gaz à effet de serre."
+        defaultOpen={true}
+      />
+
       {/* 4 Core Pillars Grid */}
       <div>
         <div className="flex items-center justify-between mb-4">
@@ -176,7 +189,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
             <div className="grid grid-cols-2 gap-3 mb-4 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
               <div>
-                <span className="text-[11px] text-slate-400 font-mono block">Irradiance Totale (TSI) :</span>
+                <span className="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+                  <span>Irradiance Totale (TSI) :</span>
+                  <HelpTooltip
+                    title="Irradiance Solaire Totale (TSI)"
+                    content="Énergie solaire électromagnétique interceptée au sommet de l'atmosphère terrestre par unité de surface (~1361 W/m²). Oscille de seulement ~0,1% sur les cycles de 11 ans."
+                  />
+                </span>
                 <span className="text-lg font-bold text-slate-100 font-mono">
                   {latestTsi?.value != null ? formatScientificValue(latestTsi.value, 'W/m²', 2) : 'Donnée indisponible'}
                 </span>
@@ -185,7 +204,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 </span>
               </div>
               <div>
-                <span className="text-[11px] text-slate-400 font-mono block">Activité taches (WDC-SILSO) :</span>
+                <span className="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+                  <span>Activité taches (SILSO) :</span>
+                  <HelpTooltip
+                    title="Nombre de taches solaires (SSN)"
+                    content="Indicateur d'activité magnétique du soleil compilé par l'Observatoire Royal de Belgique. Les pics coïncident avec les maxima du cycle de Schwabe (~11 ans)."
+                  />
+                </span>
                 <span className="text-sm font-semibold text-amber-300 font-mono mt-1 block">
                   {latestSpots?.value != null ? `${latestSpots.value} taches (SSN)` : 'Donnée indisponible'}
                 </span>
@@ -225,7 +250,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
             <div className="grid grid-cols-2 gap-3 mb-4 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
               <div>
-                <span className="text-[11px] text-slate-400 font-mono block">CO₂ (Mauna Loa) :</span>
+                <span className="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+                  <span>CO₂ (Mauna Loa) :</span>
+                  <HelpTooltip
+                    title="Concentration de CO₂"
+                    content="Fraction molaire de dioxyde de carbone mesurée en air sec à 3 397 m d'altitude à Hawaï (NOAA GML). Exprime le nombre de molécules de CO₂ par million de molécules d'air sec (ppm)."
+                  />
+                </span>
                 <span className="text-lg font-bold text-slate-100 font-mono">
                   {latestCo2?.value != null ? formatScientificValue(latestCo2.value, 'ppm', 2) : 'Donnée indisponible'}
                 </span>
@@ -240,7 +271,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 )}
               </div>
               <div>
-                <span className="text-[11px] text-slate-400 font-mono block">CH₄ (Méthane global) :</span>
+                <span className="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+                  <span>CH₄ (Méthane global) :</span>
+                  <HelpTooltip
+                    title="Méthane atmosphérique (CH₄)"
+                    content="Deuxième gaz à effet de serre en forçage direct. Mesuré en parties par milliard (ppb) sur le réseau marin NOAA GML."
+                  />
+                </span>
                 <span className="text-lg font-bold text-amber-300 font-mono">
                   {latestCh4?.value != null ? formatScientificValue(latestCh4.value, 'ppb', 1) : 'Donnée indisponible'}
                 </span>
@@ -283,7 +320,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
             <div className="grid grid-cols-2 gap-3 mb-4 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
               <div>
-                <span className="text-[11px] text-slate-400 font-mono block">Anomalie globale annuelle :</span>
+                <span className="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+                  <span>Anomalie globale annuelle :</span>
+                  <HelpTooltip
+                    title="Anomalie thermique"
+                    content="Écart de température globale terre-océan par rapport à la moyenne climatologique de référence 1951-1980 (+0,00 °C)."
+                  />
+                </span>
                 <span className="text-lg font-bold text-rose-400 font-mono">
                   {latestTemp?.value != null ? formatAnomaly(latestTemp.value) : 'Donnée indisponible'}
                 </span>
@@ -292,7 +335,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 </span>
               </div>
               <div>
-                <span className="text-[11px] text-slate-400 font-mono block">Comparaison préindustrielle :</span>
+                <span className="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+                  <span>Comparaison préindustrielle :</span>
+                  <HelpTooltip
+                    title="Référence préindustrielle"
+                    content="Estimation du réchauffement par rapport à la période 1850-1900 (+0,28°C par rapport à la base 1951-1980 selon le GIEC)."
+                  />
+                </span>
                 {preindustrialAnomaly !== null ? (
                   <span className="text-sm font-semibold text-rose-300 font-mono mt-1 block">
                     ~+{preindustrialAnomaly.toFixed(2)} °C

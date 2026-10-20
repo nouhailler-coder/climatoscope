@@ -13,6 +13,7 @@ import { calculatePearsonCorrelation, CORRELATION_DISCLAIMER } from '../../analy
 import { normalizeSeries } from '../../analysis/normalization';
 import { NormalizationMode, TimeSeriesPoint, DatasetMetadata } from '../../types/dataset';
 import { AlertCircle, Sliders, Scale } from 'lucide-react';
+import { HelpTooltip } from '../common/HelpTooltip';
 
 export interface SeriesConfig {
   id: string;
@@ -137,7 +138,11 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({
         <div>
           <span className="text-xs text-slate-400 font-mono flex items-center gap-1.5 mb-1.5">
             <Scale className="w-3.5 h-3.5 text-cyan-400" />
-            Mode de normalisation mathématique :
+            <span>Mode de normalisation mathématique :</span>
+            <HelpTooltip
+              title="Modes de normalisation"
+              content="Le Z-score (centré-réduit) divise l'écart à la moyenne par l'écart-type, rendant comparables des grandeurs aux échelles dissemblables (ppm, W/m², °C). L'Indice 100 fixe la valeur de départ à 100."
+            />
           </span>
           <div className="inline-flex rounded-lg bg-slate-950 p-1 border border-slate-800 text-xs">
             {[

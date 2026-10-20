@@ -1,86 +1,172 @@
-# 🌍 ClimatOSCOPE (v0.1)
+<div align="center">
 
-> **Comprendre le climat à partir des mesures.**  
-> *Observer → Comparer → Analyser → Comprendre*
+  <img src="public/icon.svg" alt="ClimatOSCOPE Logo" width="96" height="96" />
 
----
+  # 🌍 ClimatOSCOPE
+  
+  ### *Comprendre le climat à partir des mesures physiques directes*
+  
+  **Observatoire scientifique open-data · Séries temporelles d'organismes de recherche internationaux · Architecture Progressive Web App (PWA) Offline-First**
 
-## 1. Présentation Générale
+  [![Version](https://img.shields.io/badge/Version-v0.7.0-cyan.svg)](https://github.com)
+  [![Cloudflare Pages](https://img.shields.io/badge/Deploy-Cloudflare%20Pages-orange?logo=cloudflare)](https://pages.cloudflare.com)
+  [![PWA Ready](https://img.shields.io/badge/PWA-Installable%20Offline-emerald?logo=pwa)](https://web.dev/progressive-web-apps/)
+  [![Test Suite](https://img.shields.io/badge/Vitest-27%20passed-brightgreen.svg?logo=vitest)](https://vitest.dev)
+  [![License](https://img.shields.io/badge/Licence-MIT%20%2F%20Open%20Data-blue.svg)](LICENSE)
 
-**ClimatOSCOPE** est une application web progressive (PWA) conçue comme un **observatoire scientifique open data**.  
-L'application met à disposition du grand public, des étudiants, des chercheurs et des curieux les séries temporelles de mesures physiques issues directement des grands organismes de recherche internationaux (NASA, NOAA, LASP, SILSO).
+  <br />
 
-### Principes Non-Négociables
-1. **Zéro donnée fictive :** Toutes les séries affichées reposent sur des observations ou reconstructions publiées et vérifiables.
-2. **Distinction Corrélation vs Causalité :** Aucune corrélation statistique ne peut être présentée comme une preuve de causalité sans mécanisme physique explicité.
-3. **Architecture Offline-First :** Toutes les données consultées sont conservées en local dans **IndexedDB** et via le Service Worker PWA (Workbox), permettant une consultation intégrale sans connexion internet.
-4. **Zéro backend requis :** Déploiement statique autonome (compatible Netlify, Cloudflare Pages, GitHub Pages, Vercel).
+  <img src="public/screenshot-dashboard.jpg" alt="Capture d'écran du tableau de bord ClimatOSCOPE" width="100%" style="border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);" />
 
----
+  <br />
+  <em>Vue du tableau de bord multi-indicateurs avec navigation catégorisée, thèmes Sombre/Clair et traçabilité scientifique de bout en bout.</em>
 
-## 2. Modules Intégrés au MVP (v0.1)
-
-1. ☀️ **Activité & Rayonnement Solaire**
-   * Irradiance Solaire Totale (TSI en W/m²) — NASA/LASP LISIRD (Kopp et al., SORCE, TSIS-1 TIM).
-   * Nombre international de taches solaires (SSN) — WDC-SILSO Observatoire Royal de Belgique.
-2. 🧪 **CO₂ Atmosphérique**
-   * Série continue mensuelle de Mauna Loa (fraction molaire ppm) — NOAA Global Monitoring Laboratory (GML) & Scripps Institution of Oceanography.
-3. 🌡️ **Température Globale de Surface**
-   * Anomalie de température globale terre-océan (°C relative à 1951-1980) — NASA Goddard Institute for Space Studies (GISTEMP v4).
-   * Datasets comparatifs alternatifs : NOAA GlobalTemp v5 (NCEI) et Berkeley Earth.
-4. ☀️ **NASA POWER (Rayonnement au Sol & Climatologie Locale)**
-   * Flux solaire incident au sol (`ALLSKY_SFC_SW_DWN` en kWh/m²/jour).
-   * Sélecteur de localisation mondial (Paris, Mauna Loa, Dakar, Tokyo, Sydney, Tromsø, São Paulo, Le Caire et coordonnées GPS libres).
-5. ⚖️ **Comparateur Multi-Séries & Corrélation**
-   * Superposition synchronisée multi-variables.
-   * Modes de normalisation : *Valeurs brutes*, *Indice 100*, *Anomalie*, *Z-Score (centré-réduit)*.
-   * Moyennes mobiles lissantes (12m, 5 ans, 10 ans), tendances linéaires par régression des moindres carrés, coefficient de corrélation linéaire de Pearson (r) et R² avec notice d'avertissement épistémologique systématique.
+</div>
 
 ---
 
-## 3. Installation et Développement
+## 📌 Sommaire
 
-### Prérequis
-* Node.js (version 20 ou supérieure recommandée)
-* npm
+- [✨ Points Forts & Fonctionnalités](#-points-forts--fonctionnalités)
+- [📱 Installation de l'Application (PWA)](#-installation-de-lapplication-pwa)
+- [⚙️ Paramètres Système & Mises à Jour Automatiques](#️-paramètres-système--mises-à-jour-automatiques)
+- [🌓 Mode Sombre & Ergonomie Visuelle](#-mode-sombre--ergonomie-visuelle)
+- [🧭 Onboarding Légal & Guides Contextuels](#-onboarding-légal--guides-contextuels)
+- [🔬 Catalogue des Modules Scientifiques](#-catalogue-des-modules-scientifiques)
+- [☁️ Déploiement Optimisé Cloudflare Pages](#️-déploiement-optimisé-cloudflare-pages)
+- [💻 Développement & Commandes](#-développement--commandes)
+- [⚖️ Clause de Non-Responsabilité](#️-clause-de-non-responsabilité)
 
-### Installation
+---
+
+## ✨ Points Forts & Fonctionnalités
+
+ClimatOSCOPE est conçu pour offrir aux citoyens, étudiants, ingénieurs et chercheurs une interface transparente, rigoureuse et sans filtre partisan :
+
+| Pilier | Description |
+| :--- | :--- |
+| **Zéro Donnée Fictive** | 100% des séries proviennent de dépôts publics vérifiables (NASA, NOAA, Berkeley Earth, LASP, SILSO, ECMWF). |
+| **Menu Hamburger Catégorisé** | Tiroir latéral structuré en 6 catégories claires pour naviguer aisément entre les 14 modules. |
+| **Mises à Jour en Arrière-Plan** | Système autonome de détection et rafraîchissement régulier des versions et données en cache. |
+| **PWA Installable en 1 Clic** | Bouton universel « Installer l'application » pour mobile (iOS/Android) et desktop (Chrome, Edge, macOS, Windows). |
+| **Thème Sombre Observatoire** | Interface soignée haute lisibilité avec bascule instantanée vers un thème clair. |
+| **Épistémologie & Garde-fous** | Distinction stricte entre corrélation mathématique et causalité physique démontrée. |
+| **Offline-First & Résilience** | Cache local persistant via **IndexedDB** et Service Worker (Workbox). Aucune coupure réseau ne bloque l'analyse. |
+
+---
+
+## 📱 Installation de l'Application (PWA)
+
+ClimatOSCOPE est une **Progressive Web App (PWA)** certifiée. Elle peut être installée comme une application native sans passer par les stores d'applications :
+
+* 🖥️ **Sur Ordinateur (Chrome, Edge, Brave, Safari) :** Cliquez sur le bouton bleu **« Installer l'app »** situé dans l'en-tête ou dans le menu Hamburger. Une boîte de dialogue du navigateur vous invitera à ajouter l'application à votre bureau.
+* 📱 **Sur Mobile Android :** Le bouton déclenche l'invite native d'installation pour créer une icône autonome sur l'écran d'accueil avec affichage plein écran.
+* 🍏 **Sur iPhone / iPad (Safari iOS) :** Cliquez sur le bouton d'installation pour ouvrir le guide pas-à-pas interactif (*Bouton Partager* <kbd>⎙</kbd> → *Sur l'écran d'accueil* <kbd>＋</kbd>).
+
+---
+
+## ⚙️ Paramètres Système & Mises à Jour Automatiques
+
+Accessible depuis l'icône <kbd>⚙️</kbd> de l'en-tête ou le menu Hamburger, le panneau **Paramètres Système** comprend :
+
+1. **Date de Sortie Officielle :** Horodatage certifié de la version déployée (`20 octobre 2026`).
+2. **Date de la Dernière Vérification :** Horodatage exact de la dernière interrogation du serveur.
+3. **Bouton « Vérifier les mises à jour » :** Lance une interrogation immédiate du Service Worker et de la signature applicative.
+4. **Bouton « Forcer la mise à jour » :** Purge instantanément tous les caches (Service Worker, CacheStorage, IndexedDB) et recharge la dernière version propre.
+5. **Worker Automatique en Arrière-Plan :** Vérifie automatiquement la disponibilité de nouvelles versions :
+   - Toutes les 30 minutes de manière transparente ;
+   - Dès que l'onglet redevient actif après une mise en veille ;
+   - Dès que l'appareil retrouve sa connexion réseau.
+
+---
+
+## 🌓 Mode Sombre & Ergonomie Visuelle
+
+L'application propose deux ambiances chromatiques adaptées à tous les environnements :
+- **Thème Sombre (par défaut) :** Palette spatiale basée sur *Slate 950*, optimisée pour les écrans OLED, réduisant la fatigue visuelle lors de l'étude prolongée des graphiques.
+- **Thème Clair :** Palette claire et contrastée conçue pour les projections en salle de cours ou les impressions.
+- Changement instantané avec synchronisation `localStorage` et mise à jour de la balise HTML `meta name="theme-color"`.
+
+---
+
+## 🧭 Onboarding Légal & Guides Contextuels
+
+- **Onboarding de Bienvenue :** À la première ouverture (ou via le bouton *Mentions Légales*), une modale explicite rappelle la neutralité de l'outil et détaille la provenance des données.
+- **Clause de Non-Responsabilité :** L'éditeur décline formellement toute responsabilité légale quant à l'exactitude, l'exhaustivité ou l'usage fait des données scientifiques fournies.
+- **Guides Contextuels Déroulants sur Chaque Écran :** Chaque module dispose d'un bandeau pédagogique repliable détaillant :
+  - *Ce que mesure cet écran* ;
+  - *Source officielle & Méthode de calcul* ;
+  - *Clé d'interprétation physique*.
+- **Infobulles Interactives (`?`) :** Présentes à côté de chaque champ, filtre de profondeur, curseur d'éruption ou sélecteur géographique pour expliquer leur signification.
+
+---
+
+## 🔬 Catalogue des Modules Scientifiques
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                          CATÉGORIES DU MENU                            │
+├──────────────────────────┬─────────────────────────────────────────────┤
+│ 1. Vue d'ensemble        │ 📊 Observatoire Général Multi-Indicateurs   │
+│ 2. Climat & Températures │ 🌡️ Température Globale (GISS, NOAA, Berkeley)│
+│                          │ 🌎 Réanalyses ERA5 & Amplification Polaire  │
+│ 3. Gaz à Effet de Serre  │ 🧪 Mauna Loa CO₂ & Scripps Keeling Curve    │
+│                          │ 💨 Méthane (CH₄), Protoxyde (N₂O) & AGGI    │
+│                          │ ☁️ Aérosols Troposphériques CAMS & Twomey   │
+│ 4. Cycles Naturels       │ ☀️ Irradiance Solaire LISIRD (TSI) & SILSO  │
+│                          │ 🌋 Volcanisme & Forçage Stratosphérique SAOD│
+│ 5. Océans & Glaces       │ 🌊 Contenu Thermique OHC (Argo 0-2000m)     │
+│                          │ 🧊 Banquise Arctique & Antarctique (NSIDC)  │
+│                          │ 🌐 Bilan Radiatif CERES au Sommet (TOA)     │
+│ 6. Outils & Méthode      │ ☀️ Climatologie Locale Solaire NASA POWER   │
+│                          │ ⚖️ Comparateur Multi-Séries & Corrélation    │
+│                          │ 📚 Registre des Sources & Cache IndexedDB   │
+│                          │ ❓ Guide Épistémologique « Comment Lire ? » │
+└──────────────────────────┴─────────────────────────────────────────────┘
+```
+
+---
+
+## ☁️ Déploiement Optimisé Cloudflare Pages
+
+Le projet est conçu pour être déployé sur **Cloudflare Pages** :
+
+* **Zéro fichier `bun.lock` :** Utilisation stricte de standard `npm` et `package-lock.json` pour éviter tout échec de build sur l'environnement Cloudflare.
+* **Routage SPA :** Fichier `public/_redirects` configuré pour rediriger toutes les routes vers `index.html` (`/*  /index.html  200`).
+* **Politique d'en-têtes HTTP (`public/_headers`) :**
+  - Cache immuable de 1 an sur les assets statiques avec hash (`/assets/*`).
+  - Cache désactivé (`max-age=0, no-cache`) sur `sw.js` et `manifest.webmanifest` pour garantir l'installation immédiate des mises à jour.
+  - En-têtes de sécurité : `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`.
+
+---
+
+## 💻 Développement & Commandes
+
 ```bash
+# 1. Cloner et installer les dépendances standard
 npm install
-```
 
-### Lancement du serveur de développement
-```bash
+# 2. Lancer le serveur de développement (port 3000)
 npm run dev
-```
-L'application démarre sur `http://localhost:3000`.
 
-### Exécution des tests unitaires
-```bash
+# 3. Exécuter la suite de tests automatisés (27 tests)
 npm test
-```
 
-### Vérification du typage TypeScript
-```bash
+# 4. Vérifier la conformité TypeScript
 npm run lint
-```
 
-### Construction pour production (Build)
-```bash
+# 5. Compiler pour la production (sortie dist/)
 npm run build
 ```
 
 ---
 
-## 4. Documentation Technique
+## ⚖️ Clause de Non-Responsabilité
 
-Consultez les dossiers `docs/` pour la documentation exhaustive :
-* [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) : Diagrammes d'architecture logicielle, flux de données et cache IndexedDB.
-* [`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md) : Inventaire complet des APIs et dépôts institutionnels (URLs, formats, fréquences, CORS, licences).
-* [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) : Protocoles de calcul mathématique (normalisation, anomalies, moyennes mobiles, Pearson).
-* [`docs/SCIENTIFIC_NOTES.md`](docs/SCIENTIFIC_NOTES.md) : Forçages radiatifs (W/m²), spectroscopie du CO₂, découplage solaire/thermique moderne.
+> **Avertissement :** L’éditeur et les contributeurs de l'application ClimatOSCOPE déclinent formellement toute responsabilité quant à l’exactitude, l'exhaustivité, l’actualité ou l’adéquation à un usage particulier des données, calculs, graphiques et séries temporelles présentés. L'application est fournie « en l'état », à des fins purement éducatives et informatives. Les données officielles restent la propriété exclusive des organismes émetteurs respectifs (NASA, NOAA, ECMWF, SILSO, LASP, NSIDC).
 
 ---
 
-## 5. Licence
-Code source sous licence open source MIT. Les données scientifiques restent soumises aux politiques d'accès ouvert des agences émettrices (NASA Open Data, NOAA Public Domain, SILSO CC-BY-NC 4.0).
+<div align="center">
+  <sub>ClimatOSCOPE · Conçu pour l'accès universel et transparent aux données climatiques ouvertes · 2026</sub>
+</div>
